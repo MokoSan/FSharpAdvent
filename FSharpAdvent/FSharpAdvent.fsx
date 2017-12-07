@@ -114,7 +114,13 @@ listOfLinksOfCharacters
         let hobbitRace = doc.CssSelect("a[title|=Hobbit]")
         let isHobbit = hobbitRace.Length > 0
 
-        let elfRace    = doc.CssSelect("a[title|=Elf]")
+        let elfRace    = doc.CssSelect("a[title|=Elves]")
         let isElf = elfRace.Length > 0
 
-        printfn "%A Is Man: %A Is Hobbit: %A Is Elf: %A"  g isMen isHobbit isElf )
+        let dwarfRace = doc.CssSelect("a[title|=Dwarves]")
+        let isDwarf = dwarfRace.Length > 0
+
+        let orcRace = doc.CssSelect("a[title|=Orcs]")
+        let isOrc  = orcRace.Length > 0
+
+        printfn "%A Is Man: %A Is Hobbit: %A Is Elf: %A Is Dwarf: %A isOrc: %A"  g isMen isHobbit isElf isDwarf isOrc )
