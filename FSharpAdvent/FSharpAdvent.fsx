@@ -117,4 +117,4 @@ listOfLinksOfCharacters
         let elfRace    = doc.CssSelect("a[title|=Elf]")
         let isElf = elfRace.Length > 0
 
-        printfn "%A %A %A %A"  g isMen isHobbit isElf )
+        printfn "%A Is Man: %A Is Hobbit: %A Is Elf: %A"  g isMen isHobbit isElf )
