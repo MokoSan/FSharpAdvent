@@ -34,16 +34,12 @@ let lotrCharacterProviderPage4  = LotrCharacterProviderPage4.Load( characterURLP
 type LotrCharacterProviderPage5 = HtmlProvider< characterURLPage5 >
 let lotrCharacterProviderPage5  = LotrCharacterProviderPage5.Load( characterURLPage5 )
 
-let getAnchorTagDecendants ( lists : HtmlNode list ) : string list list = 
+let getListOfListOfLinks ( lists : HtmlNode list ) : string list list = 
     lists
     |> List.map( fun l -> 
         Seq.toList ( l.Descendants[ "a" ]  )
-        |> List.map( fun ll -> baseWikiURL + ll.TryGetAttribute( "href").Value.Value() ))
+        |> List.map( fun ll -> baseWikiURL + ll.TryGetAttribute("href").Value.Value() ))
     |> Seq.toList
-
- let getCharacterURLsFromAppropriateHtmlNodes ( attributes : seq<HtmlNode> ) : seq<string> =
-    attributes
-    |> Seq.map( fun a -> baseWikiURL + a.TryGetAttribute( "href" ).Value.Value() )
 
 let validCharacterLists =
     [
