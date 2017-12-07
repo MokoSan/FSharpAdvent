@@ -96,4 +96,25 @@ let validCharacterLists =
         lotrCharacterProviderPage5.Lists.Ó.Html;
     ]
 
-let listOfLinksOfCharacters = List.concat ( getAnchorTagDecendants ( validCharacterLists ))
+let listOfLinksOfCharacters = List.concat ( getListOfListOfLinks ( validCharacterLists ))
+
+let grab2 = listOfLinksOfCharacters |> List.take 2
+
+type Character = { Name : string; Url : string; Race : string }
+
+listOfLinksOfCharacters 
+|> List.take 100
+|> List.iter 
+    ( fun ( g : string ) -> 
+        let doc = HtmlDocument.Load( g ) 
+
+        let menRace = doc.CssSelect("a[title|=Men]")
+        let isMen   = menRace.Length > 0   
+
+        let hobbitRace = doc.CssSelect("a[title|=Hobbit]")
+        let isHobbit = hobbitRace.Length > 0
+
+        let elfRace    = doc.CssSelect("a[title|=Elf]")
+        let isElf = elfRace.Length > 0
+
+        printfn "%A %A %A %A"  g isMen isHobbit isElf )
