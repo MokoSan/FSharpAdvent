@@ -1,6 +1,7 @@
 ﻿#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\FSharp.Data.2.4.3\lib\net45\FSharp.Data.dll"
 
 open FSharp.Data
+open System.IO
 
 type Race = 
     | Hobbit
@@ -166,9 +167,25 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
             printfn "Skipping: Name: %A; Url: %A" c.Name c.Url 
             c
 
-grab2 |> Seq.map( getRaceFromURL )
-
 let listOfCompleteCharacters : seq< CharacterInfo > = 
     incompleteCharacters |> Seq.map( getRaceFromURL )
+
+let top200Characters = 
+    listOfCompleteCharacters
+    |> Seq.take 200
+    |> Seq.map( getRaceFromURL )
+
+let baseSave = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent\bin\Debug\"
+let writeTop200CharactersToCsv =
+    top200Characters
+    |> Seq.iter( fun t ->
+        let csvString = sprintf "%A,%A,%A\n" t.Name t.Url t.Race
+        match t.Race with
+        | NotFound -> 
+            File.AppendAllText( baseSave + "NotFound.csv", csvString )
+            ()
+        | _ -> 
+            File.AppendAllText( baseSave + "Correct.csv", csvString )
+            ())
 
 listOfCompleteCharacters |> Seq.take 2 
