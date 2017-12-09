@@ -177,7 +177,7 @@ let top200Characters =
 
 let baseSave = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent\bin\Debug\"
 let writeTop200CharactersToCsv =
-    top200Characters
+    listOfCompleteCharacters
     |> Seq.iter( fun t ->
         let csvString = sprintf "%A,%A,%A\n" t.Name t.Url t.Race
         match t.Race with
