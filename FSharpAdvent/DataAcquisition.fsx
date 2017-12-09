@@ -176,7 +176,7 @@ let top200Characters =
     |> Seq.map( getRaceFromURL )
 
 let baseSave = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent\bin\Debug\"
-let writeTop200CharactersToCsv =
+let writeAllCharacters =
     listOfCompleteCharacters
     |> Seq.iter( fun t ->
         let csvString = sprintf "%A,%A,%A\n" t.Name t.Url t.Race
