@@ -130,9 +130,6 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
                       themeIsManFromLaketown.IsEmpty && 
                       themeIsManDunedain.IsEmpty )
 
-            let isHobbit : bool =
-                not ( doc.CssSelect( "aside.pi-theme-Hobbits").IsEmpty )
-                
             let isElf : bool =
                 let themeIsElf          = doc.CssSelect( "aside.pi-theme-Elves" )
                 let themeIsLorienElf    = doc.CssSelect( "aside.pi-theme-Elves-Loth-Lorien" )
@@ -146,8 +143,11 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
                       themeIsMirkwoodElf.IsEmpty &&
                       themeIsRivendellElf.IsEmpty )
 
-            let dwarfRace = doc.CssSelect("a[title|=Dwarves]")
-            let isDwarf = dwarfRace.Length > 0
+            let isDwarf : bool = 
+                not ( doc.CssSelect( "aside.pi-theme-Dwarves").IsEmpty )
+
+            let isHobbit : bool =
+                not ( doc.CssSelect( "aside.pi-theme-Hobbits").IsEmpty )
 
             let getRace() = 
                 if   isHuman  then Human 
