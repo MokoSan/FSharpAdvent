@@ -134,11 +134,15 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
                 not ( doc.CssSelect( "aside.pi-theme-Hobbits").IsEmpty )
                 
             let isElf : bool =
+                let themeIsElf          = doc.CssSelect( "aside.pi-theme-Elves" )
                 let themeIsLorienElf    = doc.CssSelect( "aside.pi-theme-Elves-Loth-Lorien" )
                 let themeIsMirkwoodElf  = doc.CssSelect( "aside.pi-theme-Elves-Mirkwood" )
                 let themeIsRivendellElf = doc.CssSelect( "aside.pi-theme-Elves-Rivendell" )
+                let themeIsHighElves    = doc.CssSelect( "aside.pi-theme-High-Elves" )
 
-                not ( themeIsLorienElf.IsEmpty   &&
+                not ( themeIsElf.IsEmpty         &&
+                      themeIsHighElves.IsEmpty   &&
+                      themeIsLorienElf.IsEmpty   &&
                       themeIsMirkwoodElf.IsEmpty &&
                       themeIsRivendellElf.IsEmpty )
 
