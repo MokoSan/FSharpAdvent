@@ -44,15 +44,14 @@ let lotrCharacterProviderPage4  = LotrCharacterProviderPage4.Load( characterURLP
 type LotrCharacterProviderPage5 = HtmlProvider< characterURLPage5 >
 let lotrCharacterProviderPage5  = LotrCharacterProviderPage5.Load( characterURLPage5 )
 
-let getListOfListOfLinks ( lists : HtmlNode list ) : CharacterInfo list list = 
+let getListOfListOfLinks ( lists : HtmlNode list ) : seq< seq< CharacterInfo >> = 
     lists
-    |> List.map( fun l -> 
-        Seq.toList ( l.Descendants[ "a" ]  )
-        |> List.map( fun ll -> 
+    |> Seq.map( fun l -> 
+        ( l.Descendants[ "a" ]  )
+        |> Seq.map( fun ll -> 
             let characterName = ll.TryGetAttribute("title").Value.Value()
             let url           = baseWikiURL + ll.TryGetAttribute("href").Value.Value() 
             createBaseCharacterInfoFromData characterName url  ))
-    |> Seq.toList
 
 let validCharacterLists =
     [
@@ -108,14 +107,13 @@ let validCharacterLists =
         lotrCharacterProviderPage5.Lists.Ó.Html;
     ]
 
-let listOfIncompleteCharacters = List.concat ( getListOfListOfLinks ( validCharacterLists ))
+let incompleteCharacters = Seq.concat ( getListOfListOfLinks ( validCharacterLists ))
 
-let grab2 = listOfIncompleteCharacters |> List.take 2
+let grab2 = incompleteCharacters |> Seq.take 2
 
 let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
         try
             let doc = HtmlDocument.Load( c.Url ) 
-
             let menRace = doc.CssSelect("a[title|=Men]")
             let isMen   = menRace.Length > 0   
 
@@ -135,14 +133,19 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
                 elif isDwarf  then Dwarf 
                 else NotFound
 
-            { c with Race = getRace() }
+            let race = getRace()
+
+            printfn "Name: %A; Url: %A Race: %A" c.Name c.Url race
+            { c with Race = race }
         // In the case of an exception - just simply skip to the next character. 
         with
-           | :? System.Exception -> c
+           | :? System.Exception -> 
+            printfn "Skipping: Name: %A; Url: %A" c.Name c.Url 
+            c
 
-grab2 |> List.map( getRaceFromURL )
+grab2 |> Seq.map( getRaceFromURL )
 
-let listOfCompleteCharacters = 
-    listOfIncompleteCharacters |> List.map( getRaceFromURL )
+let listOfCompleteCharacters : seq< CharacterInfo > = 
+    incompleteCharacters |> Seq.map( getRaceFromURL )
 
-listOfCompleteCharacters |> List.take 2 
+listOfCompleteCharacters |> Seq.take 2 
