@@ -7,8 +7,13 @@ type Race =
     | Elf
     | Dwarf
     | Man
+    | NotFound
 
-type CharacterInfo = { Name : string; Url : string; Race : Race option }
+type CharacterInfo = { Name : string; Url : string; Race : Race }
+
+let createBaseCharacterInfoFromData ( name : string ) 
+                                    ( url : string  ) : CharacterInfo =
+    { Name = name; Url = url; Race = NotFound }
 
 [<Literal>]
 let baseWikiURL  = @"http://lotr.wikia.com/" 
@@ -42,12 +47,14 @@ let lotrCharacterProviderPage4  = LotrCharacterProviderPage4.Load( characterURLP
 type LotrCharacterProviderPage5 = HtmlProvider< characterURLPage5 >
 let lotrCharacterProviderPage5  = LotrCharacterProviderPage5.Load( characterURLPage5 )
 
-let getListOfListOfLinks ( lists : HtmlNode list ) : string list list = 
+let getListOfListOfLinks ( lists : HtmlNode list ) : CharacterInfo list list = 
     lists
     |> List.map( fun l -> 
         Seq.toList ( l.Descendants[ "a" ]  )
         |> List.map( fun ll -> 
-            baseWikiURL + ll.TryGetAttribute("href").Value.Value() ))
+            let characterName = ll.TryGetAttribute("title").Value.Value()
+            let url           = baseWikiURL + ll.TryGetAttribute("href").Value.Value() 
+            createBaseCharacterInfoFromData characterName url  ))
     |> Seq.toList
 
 let validCharacterLists =
@@ -108,11 +115,10 @@ let listOfLinksOfCharacters = List.concat ( getListOfListOfLinks ( validCharacte
 
 let grab2 = listOfLinksOfCharacters |> List.take 2
 
-listOfLinksOfCharacters 
-|> List.take 100
-|> List.iter 
-    ( fun ( g : string ) -> 
-        let doc = HtmlDocument.Load( g ) 
+grab2
+|> List.map 
+    ( fun ( g : CharacterInfo ) -> 
+        let doc = HtmlDocument.Load( g.Url ) 
 
         let menRace = doc.CssSelect("a[title|=Men]")
         let isMen   = menRace.Length > 0   
@@ -126,7 +132,12 @@ listOfLinksOfCharacters
         let dwarfRace = doc.CssSelect("a[title|=Dwarves]")
         let isDwarf = dwarfRace.Length > 0
 
-        let orcRace = doc.CssSelect("a[title|=Orcs]")
-        let isOrc  = orcRace.Length > 0
+        let getRace() = 
+            if   isMen    then Man
+            elif isHobbit then Hobbit
+            elif isElf    then Elf 
+            elif isDwarf  then Dwarf 
+            else NotFound
 
-        printfn "%A Is Man: %A Is Hobbit: %A Is Elf: %A Is Dwarf: %A isOrc: %A"  g isMen isHobbit isElf isDwarf isOrc )
+        printfn "Race: %A" ( getRace() ) 
+        { g with Race = getRace() })
