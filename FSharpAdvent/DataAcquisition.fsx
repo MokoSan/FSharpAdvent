@@ -6,7 +6,7 @@ type Race =
     | Hobbit
     | Elf
     | Dwarf
-    | Man
+    | Human 
     | NotFound
 
 type CharacterInfo = { Name : string; Url : string; Race : Race }
@@ -113,9 +113,19 @@ let grab2 = incompleteCharacters |> Seq.take 2
 
 let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
         try
-            let doc = HtmlDocument.Load( c.Url ) 
-            let menRace = doc.CssSelect("a[title|=Men]")
-            let isMen   = menRace.Length > 0   
+            let getHtmlDocAsync = async { return! HtmlDocument.AsyncLoad( c.Url )}
+
+            let doc = getHtmlDocAsync |> Async.RunSynchronously
+
+            let isHuman : bool = 
+                let themeIsMan             = doc.CssSelect( "aside.pi-theme-Men" ) 
+                let themeIsManFromGondor   = doc.CssSelect( "aside.pi-theme-Men-Gondor" ) 
+                let themeIsManFromRohan    = doc.CssSelect( "aside.pi-theme-Men-Rohan" )
+                let themeIsManFromLaketown = doc.CssSelect( "aside.pi-theme-Men-of-Dale-Laketown" ) 
+
+                printfn "Man: %A Gondor: %A Rohan: %A" themeIsMan.IsEmpty themeIsManFromGondor.IsEmpty themeIsManFromRohan.IsEmpty
+
+                not ( themeIsMan.IsEmpty && themeIsManFromGondor.IsEmpty && themeIsManFromRohan.IsEmpty )
 
             let hobbitRace = doc.CssSelect("a[title|=Hobbit]")
             let isHobbit = hobbitRace.Length > 0
@@ -127,7 +137,7 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
             let isDwarf = dwarfRace.Length > 0
 
             let getRace() = 
-                if   isMen    then Man
+                if   isHuman  then Human 
                 elif isHobbit then Hobbit
                 elif isElf    then Elf 
                 elif isDwarf  then Dwarf 
@@ -135,7 +145,7 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
 
             let race = getRace()
 
-            printfn "Name: %A; Url: %A Race: %A" c.Name c.Url race
+            printfn "Processed: Name: %A; Url: %A Race: %A" c.Name c.Url race
             { c with Race = race }
         // In the case of an exception - just simply skip to the next character. 
         with
