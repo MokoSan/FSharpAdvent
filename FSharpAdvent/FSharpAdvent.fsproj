@@ -57,7 +57,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
-    <None Include="FSharpAdvent.fsx" />
+    <None Include="DataAcquisition.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Data">

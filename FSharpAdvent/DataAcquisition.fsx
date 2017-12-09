@@ -2,6 +2,14 @@
 
 open FSharp.Data
 
+type Race = 
+    | Hobbit
+    | Elf
+    | Dwarf
+    | Man
+
+type CharacterInfo = { Name : string; Url : string; Race : Race option }
+
 [<Literal>]
 let baseWikiURL  = @"http://lotr.wikia.com/" 
 
@@ -38,14 +46,14 @@ let getListOfListOfLinks ( lists : HtmlNode list ) : string list list =
     lists
     |> List.map( fun l -> 
         Seq.toList ( l.Descendants[ "a" ]  )
-        |> List.map( fun ll -> baseWikiURL + ll.TryGetAttribute("href").Value.Value() ))
+        |> List.map( fun ll -> 
+            baseWikiURL + ll.TryGetAttribute("href").Value.Value() ))
     |> Seq.toList
 
 let validCharacterLists =
     [
         // Page 1
         lotrCharacterProviderPage1.Lists.A.Html;
-
         lotrCharacterProviderPage1.Lists.``A cont.``.Html;
         lotrCharacterProviderPage1.Lists.B.Html;
         lotrCharacterProviderPage1.Lists.``B cont.``.Html;
@@ -99,8 +107,6 @@ let validCharacterLists =
 let listOfLinksOfCharacters = List.concat ( getListOfListOfLinks ( validCharacterLists ))
 
 let grab2 = listOfLinksOfCharacters |> List.take 2
-
-type Character = { Name : string; Url : string; Race : string }
 
 listOfLinksOfCharacters 
 |> List.take 100
