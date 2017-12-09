@@ -29,9 +29,6 @@ let characterURLPage4 = @"http://lotr.wikia.com/wiki/Category:Characters?page=4"
 [<Literal>]
 let characterURLPage5 = @"http://lotr.wikia.com/wiki/Category:Characters?page=5" 
 
-[<Literal>]
-let raceURL      = @"http://lotr.wikia.com/wiki/Category:Races"
-
 type LotrCharacterProviderPage1 = HtmlProvider< characterURLPage1 >
 let lotrCharacterProviderPage1  = LotrCharacterProviderPage1.Load( characterURLPage1 )
 
@@ -111,33 +108,41 @@ let validCharacterLists =
         lotrCharacterProviderPage5.Lists.Ó.Html;
     ]
 
-let listOfLinksOfCharacters = List.concat ( getListOfListOfLinks ( validCharacterLists ))
+let listOfIncompleteCharacters = List.concat ( getListOfListOfLinks ( validCharacterLists ))
 
-let grab2 = listOfLinksOfCharacters |> List.take 2
+let grab2 = listOfIncompleteCharacters |> List.take 2
 
-grab2
-|> List.map 
-    ( fun ( g : CharacterInfo ) -> 
-        let doc = HtmlDocument.Load( g.Url ) 
+let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
+        try
+            let doc = HtmlDocument.Load( c.Url ) 
 
-        let menRace = doc.CssSelect("a[title|=Men]")
-        let isMen   = menRace.Length > 0   
+            let menRace = doc.CssSelect("a[title|=Men]")
+            let isMen   = menRace.Length > 0   
 
-        let hobbitRace = doc.CssSelect("a[title|=Hobbit]")
-        let isHobbit = hobbitRace.Length > 0
+            let hobbitRace = doc.CssSelect("a[title|=Hobbit]")
+            let isHobbit = hobbitRace.Length > 0
 
-        let elfRace    = doc.CssSelect("a[title|=Elves]")
-        let isElf = elfRace.Length > 0
+            let elfRace    = doc.CssSelect("a[title|=Elves]")
+            let isElf = elfRace.Length > 0
 
-        let dwarfRace = doc.CssSelect("a[title|=Dwarves]")
-        let isDwarf = dwarfRace.Length > 0
+            let dwarfRace = doc.CssSelect("a[title|=Dwarves]")
+            let isDwarf = dwarfRace.Length > 0
 
-        let getRace() = 
-            if   isMen    then Man
-            elif isHobbit then Hobbit
-            elif isElf    then Elf 
-            elif isDwarf  then Dwarf 
-            else NotFound
+            let getRace() = 
+                if   isMen    then Man
+                elif isHobbit then Hobbit
+                elif isElf    then Elf 
+                elif isDwarf  then Dwarf 
+                else NotFound
 
-        printfn "Race: %A" ( getRace() ) 
-        { g with Race = getRace() })
+            { c with Race = getRace() }
+        // In the case of an exception - just simply skip to the next character. 
+        with
+           | :? System.Exception -> c
+
+grab2 |> List.map( getRaceFromURL )
+
+let listOfCompleteCharacters = 
+    listOfIncompleteCharacters |> List.map( getRaceFromURL )
+
+listOfCompleteCharacters |> List.take 2 
