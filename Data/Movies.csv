@@ -1,5 +1,5 @@
-Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins
-"The Lord of the Rings Series",558,281,2917.0,30,17
-"The Fellowship of the Ring",178,93,871.5,13,4
-"The Two Towers ",179,94,926.0,6,2
-"The Return of the King",201,94,1.12,11,11
+Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore
+"The Lord of the Rings Series",558,281,2917.0,30,17,94.0
+"The Fellowship of the Ring",178,93,871.5,13,4,91.0
+"The Two Towers ",179,94,926.0,6,2,96.0
+"The Return of the King",201,94,1.12,11,11,95.0

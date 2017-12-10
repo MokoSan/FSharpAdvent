@@ -12,16 +12,16 @@ type MovieInfo =
       BudgetInMillions           : int; 
       BoxOfficeRevenueInMillions : float;
       AcademyAwardNominations    : int;
-      AcademyAwardWins           : int }
+      AcademyAwardWins           : int; 
+      RottenTomatoesScore        : float; }
 
       static member ToCsv( instance : MovieInfo ) : string =
-        sprintf "%A,%A,%A,%A,%A,%A\n"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins
+        sprintf "%A,%A,%A,%A,%A,%A,%A\n"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins instance.RottenTomatoesScore
          
 (* Entire Series - Overall Numbers *)
 
 [<Literal>]
 let lotrFilmSeries           = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings_(film_series)"
-
 
 type LotrFilmSeriesProvider  = HtmlProvider< lotrFilmSeries >
 let lotrFilmSeriesProvider   = LotrFilmSeriesProvider.Load( lotrFilmSeries )
@@ -47,6 +47,7 @@ let forAcademyAwardsData  = lotrFilmSeriesProvider.Lists.``Academy Awards``.Valu
 let forNominationsAndWins = forAcademyAwardsData.Split('-').[ 1 ].Split(':') // Urghh, couldn't generalize the algorithm.. :(
 let forNominations        = int ( forNominationsAndWins.[ 1 ].Split(',').[ 0 ].Replace( " ", "" ))
 let forWins               = int ( forNominationsAndWins.[ 2 ].Replace( " ", "" ))
+let forRottenTomatoes     = int ( lotrFilmSeriesProvider.Tables.``Public and critical response``.Rows.[ 0 ].``Rotten Tomatoes``.Split(' ').[0].Replace("%", ""))
 
 let getNominationData ( splitStrings : string[] ) : int =
     int ( splitStrings.[ 1 ].Split(',').[ 0 ].Replace( " ", "" ))
@@ -59,23 +60,27 @@ let ttAcademyAwardsData   = lotrFilmSeriesProvider.Lists.``Academy Awards``.Valu
 let ttNominationsAndWins  = ttAcademyAwardsData.Split('—').[ 1 ].Split(':')
 let ttNominations         = getNominationData( ttNominationsAndWins ) 
 let ttWins                = getWinsData( ttNominationsAndWins ) 
+let ttRottenTomatoes      = int ( lotrFilmSeriesProvider.Tables.``Public and critical response``.Rows.[ 1 ].``Rotten Tomatoes``.Split(' ').[0].Replace("%", ""))
 
 // The Return of the King
 let rokAcademyAwardsData  = lotrFilmSeriesProvider.Lists.``Academy Awards``.Values.[ 2 ]
 let rokNominationsAndWins = rokAcademyAwardsData.Split('—').[ 1 ].Split(':')
 let rokNominations        = getNominationData( rokNominationsAndWins )
 let rokWins               = getWinsData( rokNominationsAndWins )
+let rokRottenTomatoes     = int ( lotrFilmSeriesProvider.Tables.``Public and critical response``.Rows.[ 2 ].``Rotten Tomatoes``.Split(' ').[0].Replace("%", ""))
 
 // Overall
-let overallNominations    = forNominations + ttNominations + rokNominations
-let overallWins           = forWins        + ttWins        + rokWins 
+let overallNominations            = forNominations + ttNominations + rokNominations
+let overallWins                   = forWins        + ttWins        + rokWins 
+let overallAvgRottenTomatoesScore = ( float ( forRottenTomatoes + ttRottenTomatoes + rokRottenTomatoes )) / 3.0
 
 let overallMovieInfo = { Name                       = "The Lord of the Rings Series";
                          RuntimeInMinutes           = overallRunTimeInMinutes;
                          BudgetInMillions           = overallBudgetInMillions;
                          BoxOfficeRevenueInMillions = overallBoxOfficeRevenueInMillions;
                          AcademyAwardNominations    = overallNominations;
-                         AcademyAwardWins           = overallWins; }
+                         AcademyAwardWins           = overallWins; 
+                         RottenTomatoesScore        = overallAvgRottenTomatoesScore; }
 
 (* Fellowship of the Ring Specific Data *)
 
@@ -101,7 +106,8 @@ let forMovieInfo =  { Name                       = "The Fellowship of the Ring";
                       BoxOfficeRevenueInMillions = forBoxOfficeRevenueInMillions;
                       RuntimeInMinutes           = forRuntimeInMinutes;
                       AcademyAwardNominations    = forNominations;
-                      AcademyAwardWins           = forWins; }
+                      AcademyAwardWins           = forWins; 
+                      RottenTomatoesScore        = float( forRottenTomatoes ); }
 
 (* The Two Towers Specific Data *)
 
@@ -127,7 +133,8 @@ let ttMovieInfo =  { Name                       = "The Two Towers ";
                      BoxOfficeRevenueInMillions = ttBoxOfficeRevenueInMillions;
                      RuntimeInMinutes           = ttRuntimeInMinutes;
                      AcademyAwardNominations    = ttNominations;
-                     AcademyAwardWins           = ttWins; }
+                     AcademyAwardWins           = ttWins; 
+                     RottenTomatoesScore        = float( ttRottenTomatoes ); }
 
 (* The Return of the King Specific Data *)
 
@@ -153,7 +160,8 @@ let rokMovieInfo =  { Name                       = "The Return of the King";
                       BoxOfficeRevenueInMillions = rokBoxOfficeRevenueInMillions;
                       RuntimeInMinutes           = rokRuntimeInMinutes;
                       AcademyAwardNominations    = rokNominations;
-                      AcademyAwardWins           = rokWins; }
+                      AcademyAwardWins           = rokWins; 
+                      RottenTomatoesScore        = float( rokRottenTomatoes ); }
 
 let allMoviesInfo  =
     [
@@ -170,7 +178,7 @@ let allMoviesCsv =
 [<Literal>]
 let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
 
-File.AppendAllText( movieOutputFile , "Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins\n" )
+File.AppendAllText( movieOutputFile , "Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore\n" )
 
 allMoviesCsv
 |> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))
