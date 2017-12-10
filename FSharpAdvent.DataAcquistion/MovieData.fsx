@@ -3,11 +3,6 @@
 open System
 open FSharp.Data
 
-[<Literal>]
-let twoTowersWiki            = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Two_Towers"
-[<Literal>]
-let returnOfTheKingWiki      = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Return_of_the_King"
-
 (* Movie Domain Model - Here is what I want. ^_^ *)
 type Movie = 
     { Name                       : string; 
@@ -16,6 +11,8 @@ type Movie =
       BoxOfficeRevenueInMillions : float;
       AcademyAwardNominations    : int;
       AcademyAwardWins           : int }
+
+      //static member ToCsv() 
 
 (* Entire Series - Overall Numbers *)
 
@@ -101,3 +98,64 @@ let forMovieInfo =  { Name                       = "The Fellowship of the Ring";
                       RuntimeInMinutes           = forRuntimeInMinutes;
                       AcademyAwardNominations    = forNominations;
                       AcademyAwardWins           = forWins; }
+
+(* The Two Towers Specific Data *)
+
+[<Literal>]
+let twoTowersWiki      = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Two_Towers"
+type TwoTowersProvider = HtmlProvider< twoTowersWiki > 
+let twoTowersProvider  = TwoTowersProvider.Load( twoTowersWiki )
+
+(** Running Time, Budget and Box Office Revenue **)
+let ttFirstTableRows   = twoTowersProvider.Tables.Table1.Rows
+
+let ttRuntime          = ttFirstTableRows.[ 12 ].``The Lord of the Rings: The Two Towers 2``.Split(' ').[ 0 ]
+let ttRuntimeInMinutes = int ( ttRuntime )
+
+let ttBudget           = ttFirstTableRows.[ 15 ].``The Lord of the Rings: The Two Towers 2``.Split(' ').[ 0 ].Replace("$", "")
+let ttBudgetInMillions = int ( ttBudget )
+
+let ttBoxOfficeRevenue           = ttFirstTableRows.[ 16 ].``The Lord of the Rings: The Two Towers 2``.Split(' ').[ 0 ].Replace("$", "")
+let ttBoxOfficeRevenueInMillions = float ( ttBoxOfficeRevenue )
+
+let ttMovieInfo =  { Name                       = "The Two Towers ";
+                     BudgetInMillions           = ttBudgetInMillions;
+                     BoxOfficeRevenueInMillions = ttBoxOfficeRevenueInMillions;
+                     RuntimeInMinutes           = ttRuntimeInMinutes;
+                     AcademyAwardNominations    = ttNominations;
+                     AcademyAwardWins           = ttWins; }
+
+(* The Return of the King Specific Data *)
+
+[<Literal>]
+let returnOfTheKingWiki      = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Return_of_the_King"
+type ReturnOfTheKingProvider = HtmlProvider< returnOfTheKingWiki >
+let returnOfTheKingProvider  = ReturnOfTheKingProvider.Load( returnOfTheKingWiki )
+
+(** Running Time, Budget and Box Office Revenue **)
+let rokFirstTableRows   = returnOfTheKingProvider.Tables.Table1.Rows
+
+let rokRuntime          = rokFirstTableRows.[ 12 ].``The Lord of the Rings: The Return of the King 2``.Split(' ').[ 0 ]
+let rokRuntimeInMinutes = int ( rokRuntime )
+
+let rokBudget           = rokFirstTableRows.[ 15 ].``The Lord of the Rings: The Return of the King 2``.Split(' ').[ 0 ].Replace("$", "")
+let rokBudgetInMillions = int ( rokBudget )
+
+let rokBoxOfficeRevenue           = rokFirstTableRows.[ 16 ].``The Lord of the Rings: The Return of the King 2``.Split(' ').[ 0 ].Replace("$", "")
+let rokBoxOfficeRevenueInMillions = float ( rokBoxOfficeRevenue )
+
+let rokMovieInfo =  { Name                      = "The Return of the King";
+                     BudgetInMillions           = rokBudgetInMillions;
+                     BoxOfficeRevenueInMillions = rokBoxOfficeRevenueInMillions;
+                     RuntimeInMinutes           = rokRuntimeInMinutes;
+                     AcademyAwardNominations    = rokNominations;
+                     AcademyAwardWins           = rokWins; }
+
+
+let allMoviesInfo  =
+    [
+        overallMovieInfo;
+        rokMovieInfo;
+        ttMovieInfo;
+        rokMovieInfo
+    ]
