@@ -169,7 +169,8 @@ let allMoviesCsv =
 
 [<Literal>]
 let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
-File.AppendAllText( movieOutputFile , "Name,BudgetInMillions,BoxOfficeRevenueInMillions,RuntimeInMinutes,AcademyAwardNominations,AcademyAwardWins\n" )
+
+File.AppendAllText( movieOutputFile , "Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins\n" )
 
 allMoviesCsv
 |> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))
