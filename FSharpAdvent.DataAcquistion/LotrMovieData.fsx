@@ -1,23 +1,11 @@
 ﻿#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\FSharp.Data.2.4.3\lib\net45\FSharp.Data.dll"
+#load "MovieCommon.fsx"
 
 open System
 open System.IO
 
 open FSharp.Data
 
-(* Movie Domain Model - Here is what I want. ^_^ *)
-type MovieInfo = 
-    { Name                       : string; 
-      RuntimeInMinutes           : int; 
-      BudgetInMillions           : int; 
-      BoxOfficeRevenueInMillions : float;
-      AcademyAwardNominations    : int;
-      AcademyAwardWins           : int; 
-      RottenTomatoesScore        : float; }
-
-      static member ToCsv( instance : MovieInfo ) : string =
-        sprintf "%A,%A,%A,%A,%A,%A,%A\n"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins instance.RottenTomatoesScore
-         
 (* Entire Series - Overall Numbers *)
 
 [<Literal>]
@@ -174,11 +162,3 @@ let allMoviesInfo  =
 let allMoviesCsv = 
     allMoviesInfo
     |> List.map( MovieInfo.ToCsv )
-
-[<Literal>]
-let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
-
-File.AppendAllText( movieOutputFile , "Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore\n" )
-
-allMoviesCsv
-|> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))

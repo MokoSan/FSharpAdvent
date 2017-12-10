@@ -3,3 +3,5 @@ Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNo
 "The Fellowship of the Ring",178,93,871.5,13,4,91.0
 "The Two Towers ",179,94,926.0,6,2,96.0
 "The Return of the King",201,94,1.12,11,11,95.0
+Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore
+Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore
