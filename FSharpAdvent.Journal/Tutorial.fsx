@@ -35,20 +35,35 @@ load the contents of *this* file:
 *)
 
 (*** define-output:loading ***)
+open FSharp.Data
 open Deedle
 open System.IO
 open XPlot.GoogleCharts
 open XPlot.GoogleCharts.Deedle
 
-let file = __SOURCE_DIRECTORY__ + "/Tutorial.fsx"
-let contents = File.ReadAllText(file)
-printfn "Loaded '%s' of length %d" file contents.Length
+[<Literal>]
+let lotrCharacterData = __SOURCE_DIRECTORY__+  @"\..\Data\Characters.csv"
+printfn "%A" lotrCharacterData
+
+(** Load the Character File from the Data Folder in the CSV Type Provider. **)
+type LotrCsvProvider = CsvProvider< lotrCharacterData >
+let lotrCsvProvider  = LotrCsvProvider.Load( lotrCharacterData ) 
+
 (*** include-output:loading ***)
 
 (**
-Now, we split the contents of the file into words, count the frequency of
-words longer than 3 letters and turn the result into a Deedle series:
+Now, let print out the first 10 rows as a sanity check.
 *)
+let top10Rows = 
+    lotrCsvProvider.Rows
+    |> Seq.take 10 
+    |> Seq.iter( fun r -> printfn "Name: %A; Race: %A" r.Name r.Race ) 
+
+(** Great! The first few rows look as excepted. Next, let's load the character data into a Deedle series **)
+lotrCsvProvider.Rows
+|> Seq.map( fun r -> r.Name, r.Race )
+|> series 
+
 let words =
   contents.Split(' ', '"', '\n', '\r', '*')
   |> Array.filter (fun s -> s.Length > 3)
