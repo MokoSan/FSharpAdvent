@@ -58,7 +58,7 @@
     <None Include="App.config" />
     <None Include="CharacterData.fsx" />
     <Content Include="packages.config" />
-    <None Include="MovieData.fsx" />
+    <None Include="LotrMovieData.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Data">
