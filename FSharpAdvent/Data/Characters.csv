@@ -619,7 +619,7 @@ Name,Url,Race
 "Léod","http://lotr.wikia.com//wiki/L%C3%A9od",Human
 "Brytta Léofa","http://lotr.wikia.com//wiki/Brytta_L%C3%A9ofa",Human
 "Lóni","http://lotr.wikia.com//wiki/L%C3%B3ni",Dwarf
-"Lúthien","http://lotr.wikia.com//wiki/L%C3%BAthien",Hobbit
+"Lúthien","http://lotr.wikia.com//wiki/L%C3%BAthien",Elf
 "Mablung the Ranger","http://lotr.wikia.com//wiki/Mablung_the_Ranger",Human
 "Maedhros","http://lotr.wikia.com//wiki/Maedhros",Elf
 "Maeglin","http://lotr.wikia.com//wiki/Maeglin",Elf
@@ -897,3 +897,5 @@ Name,Url,Race
 "Nimloth (elf)","http://lotr.wikia.com//wiki/Nimloth_(elf)",Elf
 "Saradoc Brandybuck","http://lotr.wikia.com//wiki/Saradoc_Brandybuck",Hobbit
 "Gríma Wormtongue","http://lotr.wikia.com//wiki/Gr%C3%ADma_Wormtongue",Human
+"Gollum","http://lotr.wikia.com//wiki/Gollum",Hobbit
+"Legolas (elf of Gondolin)","http://lotr.wikia.com//wiki/Legolas_(elf_of_Gondolin)",Elf
