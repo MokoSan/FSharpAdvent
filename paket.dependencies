@@ -1,5 +1,7 @@
 source https://www.nuget.org/api/v2
 
 framework: >= net461
+nuget Accord
+nuget Accord.Statistics
 nuget FAKE
 nuget FSharp.Core

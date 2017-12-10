@@ -2,7 +2,7 @@
 #load "packages/FsLab/FsLab.fsx"
 (**
 
-Welcome to FsLab journal
+Lord of the Rings: An F# Approach
 ========================
 
 FsLab journal is a simple Visual Studio template that makes it easy to do
@@ -34,6 +34,10 @@ We start by referencing `Deedle` and `FSharp.Charting` libraries and then we
 load the contents of *this* file:
 *)
 
+(** 
+Referencing the Libraries 
+-------------------------
+*)
 (*** define-output:loading ***)
 open FSharp.Data
 open Deedle
@@ -41,45 +45,47 @@ open System.IO
 open XPlot.GoogleCharts
 open XPlot.GoogleCharts.Deedle
 
+(** 
+Loading the Character Data into the Journal 
+-------------------------------------------
+*)
+
 [<Literal>]
-let lotrCharacterData = __SOURCE_DIRECTORY__+  @"\..\Data\Characters.csv"
-printfn "%A" lotrCharacterData
+let lotrCharacterDataFilePath = __SOURCE_DIRECTORY__+  @"\..\Data\Characters.csv"
 
 (** Load the Character File from the Data Folder in the CSV Type Provider. **)
-type LotrCsvProvider = CsvProvider< lotrCharacterData >
-let lotrCsvProvider  = LotrCsvProvider.Load( lotrCharacterData ) 
+type LotrCsvProvider = CsvProvider< lotrCharacterDataFilePath >
+let lotrCsvProvider  = LotrCsvProvider.Load( lotrCharacterDataFilePath ) 
 
 (*** include-output:loading ***)
-
-(**
-Now, let print out the first 10 rows as a sanity check.
-*)
-let top10Rows = 
-    lotrCsvProvider.Rows
-    |> Seq.take 10 
-    |> Seq.iter( fun r -> printfn "Name: %A; Race: %A" r.Name r.Race ) 
-
-(** Great! The first few rows look as excepted. Next, let's load the character data into a Deedle series **)
-lotrCsvProvider.Rows
-|> Seq.map( fun r -> r.Name, r.Race )
-|> series 
-
-let words =
-  contents.Split(' ', '"', '\n', '\r', '*')
-  |> Array.filter (fun s -> s.Length > 3)
-  |> Array.map (fun s -> s.ToLower())
-  |> Seq.countBy id
-  |> series
-(**
-Finally, let's build a chart showing the top 6 words occurring in this tutorial:
-*)
+(** Additionally, let's add the Csv data into a Deedle Data Frame **) 
+let lotrCsvDf = Frame.ReadCsv( lotrCharacterDataFilePath )
 
 (*** define-output:chart ***)
+let options = Options( page = "enable", pageSize = 20 )
+lotrCsvDf
+|> Chart.Table
+|> Chart.WithOptions options
+|> Chart.Show
+
+(*** include-it:chart ***)
+
+let characterToRaceSeries = 
+    lotrCsvProvider.Rows
+    |> Seq.map( fun r -> r.Name, r.Race )
+    |> Seq.groupBy ( fun (_, r) -> r )
+    |> series
+printfn "%A" characterToRaceSeries
+
+(** Now, let's build the chart. *)
+(*** define-output:chart ***)
+(*
 words
 |> Series.sort
 |> Series.rev
 |> Series.take 6
 |> Chart.Column
+*)
 (*** include-it:chart ***)
 
 (**

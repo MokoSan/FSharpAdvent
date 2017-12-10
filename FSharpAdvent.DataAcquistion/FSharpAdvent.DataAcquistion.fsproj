@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>1d0d2df5-055f-408b-84b0-769f67c98458</ProjectGuid>
+    <ProjectGuid>ff7a0b45-2679-49a3-b5bb-af64cea7871e</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>FSharpAdvent</RootNamespace>
-    <AssemblyName>FSharpAdvent</AssemblyName>
+    <RootNamespace>FSharpAdvent.DataAcquistion</RootNamespace>
+    <AssemblyName>FSharpAdvent.DataAcquistion</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>FSharpAdvent</Name>
+    <Name>FSharpAdvent.DataAcquistion</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\FSharpAdvent.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FSharpAdvent.DataAcquistion.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -34,7 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\FSharpAdvent.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FSharpAdvent.DataAcquistion.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -55,9 +55,10 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <None Include="CharacterData.fsx" />
     <Content Include="packages.config" />
-    <None Include="DataAcquisition.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Data">
