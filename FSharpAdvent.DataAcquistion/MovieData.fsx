@@ -15,7 +15,7 @@ type MovieInfo =
       AcademyAwardWins           : int }
 
       static member ToCsv( instance : MovieInfo ) : string =
-        sprintf "%A,%A,%A,%A,%A,%A"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins
+        sprintf "%A,%A,%A,%A,%A,%A\n"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins
          
 (* Entire Series - Overall Numbers *)
 
@@ -158,7 +158,7 @@ let rokMovieInfo =  { Name                       = "The Return of the King";
 let allMoviesInfo  =
     [
         overallMovieInfo;
-        rokMovieInfo;
+        forMovieInfo;
         ttMovieInfo;
         rokMovieInfo
     ]
@@ -169,7 +169,7 @@ let allMoviesCsv =
 
 [<Literal>]
 let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
-File.AppendAllText( movieOutputFile , "Name,BudgetInMillions,BoxOfficeRevenueInMillions,RuntimeInMinutes,AcademyAwardNominations,AcademyAwardWins" )
+File.AppendAllText( movieOutputFile , "Name,BudgetInMillions,BoxOfficeRevenueInMillions,RuntimeInMinutes,AcademyAwardNominations,AcademyAwardWins\n" )
 
 allMoviesCsv
 |> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))
