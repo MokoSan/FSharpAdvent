@@ -180,7 +180,7 @@ let top200Characters =
     |> Seq.take 200
     |> Seq.map( getRaceFromURL )
 
-let baseSave = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent\bin\Debug\"
+let baseSave = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent.DataAcquisition\bin\Debug\"
 let writeAllCharacters =
     listOfCompleteCharacters
     |> Seq.iter( fun t ->

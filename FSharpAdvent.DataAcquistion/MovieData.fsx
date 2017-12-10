@@ -1,10 +1,12 @@
 ﻿#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\FSharp.Data.2.4.3\lib\net45\FSharp.Data.dll"
 
 open System
+open System.IO
+
 open FSharp.Data
 
 (* Movie Domain Model - Here is what I want. ^_^ *)
-type Movie = 
+type MovieInfo = 
     { Name                       : string; 
       RuntimeInMinutes           : int; 
       BudgetInMillions           : int; 
@@ -12,12 +14,14 @@ type Movie =
       AcademyAwardNominations    : int;
       AcademyAwardWins           : int }
 
-      //static member ToCsv() 
-
+      static member ToCsv( instance : MovieInfo ) : string =
+        sprintf "%A,%A,%A,%A,%A,%A"  instance.Name instance.RuntimeInMinutes instance.BudgetInMillions instance.BoxOfficeRevenueInMillions instance.AcademyAwardNominations instance.AcademyAwardWins
+         
 (* Entire Series - Overall Numbers *)
 
 [<Literal>]
 let lotrFilmSeries           = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings_(film_series)"
+
 
 type LotrFilmSeriesProvider  = HtmlProvider< lotrFilmSeries >
 let lotrFilmSeriesProvider   = LotrFilmSeriesProvider.Load( lotrFilmSeries )
@@ -144,13 +148,12 @@ let rokBudgetInMillions = int ( rokBudget )
 let rokBoxOfficeRevenue           = rokFirstTableRows.[ 16 ].``The Lord of the Rings: The Return of the King 2``.Split(' ').[ 0 ].Replace("$", "")
 let rokBoxOfficeRevenueInMillions = float ( rokBoxOfficeRevenue )
 
-let rokMovieInfo =  { Name                      = "The Return of the King";
-                     BudgetInMillions           = rokBudgetInMillions;
-                     BoxOfficeRevenueInMillions = rokBoxOfficeRevenueInMillions;
-                     RuntimeInMinutes           = rokRuntimeInMinutes;
-                     AcademyAwardNominations    = rokNominations;
-                     AcademyAwardWins           = rokWins; }
-
+let rokMovieInfo =  { Name                       = "The Return of the King";
+                      BudgetInMillions           = rokBudgetInMillions;
+                      BoxOfficeRevenueInMillions = rokBoxOfficeRevenueInMillions;
+                      RuntimeInMinutes           = rokRuntimeInMinutes;
+                      AcademyAwardNominations    = rokNominations;
+                      AcademyAwardWins           = rokWins; }
 
 let allMoviesInfo  =
     [
@@ -159,3 +162,14 @@ let allMoviesInfo  =
         ttMovieInfo;
         rokMovieInfo
     ]
+  
+let allMoviesCsv = 
+    allMoviesInfo
+    |> List.map( MovieInfo.ToCsv )
+
+[<Literal>]
+let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
+File.AppendAllText( movieOutputFile , "Name,BudgetInMillions,BoxOfficeRevenueInMillions,RuntimeInMinutes,AcademyAwardNominations,AcademyAwardWins" )
+
+allMoviesCsv
+|> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))
