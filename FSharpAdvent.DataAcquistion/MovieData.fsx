@@ -4,19 +4,18 @@ open System
 open FSharp.Data
 
 [<Literal>]
-let fellowshipOfTheRingWiki  = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Fellowship_of_the_Ring"
-[<Literal>]
 let twoTowersWiki            = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Two_Towers"
 [<Literal>]
 let returnOfTheKingWiki      = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Return_of_the_King"
 
-(* Movie Domain Model *)
-type Movie =
-    { Name             : string; 
-      RuntimeInMinutes : int; 
-      BudgetInMillions : int; 
-      BoxOfficeRevenue : float;
-      }
+(* Movie Domain Model - Here is what I want. ^_^ *)
+type Movie = 
+    { Name                       : string; 
+      RuntimeInMinutes           : int; 
+      BudgetInMillions           : int; 
+      BoxOfficeRevenueInMillions : float;
+      AcademyAwardNominations    : int;
+      AcademyAwardWins           : int }
 
 (* Entire Series - Overall Numbers *)
 
@@ -30,8 +29,8 @@ let lotrFilmSeriesProvider   = LotrFilmSeriesProvider.Load( lotrFilmSeries )
 let overallFirstTablesRows            = lotrFilmSeriesProvider.Tables.Table1.Rows
 
 // Running Time
-let overallRunningTime                = overallFirstTablesRows.[ 12 ].``The Lord of the Rings 2``  
-let overallRunningTimeInMinutes       = int( overallRunningTime.Split(' ').[ 0 ] )
+let overallRunTime          = overallFirstTablesRows.[ 12 ].``The Lord of the Rings 2``  
+let overallRunTimeInMinutes = int( overallRunTime.Split(' ').[ 0 ] )
 
 // Budget
 let overallBudget                     = overallFirstTablesRows.[ 15 ].``The Lord of the Rings 2``
@@ -41,8 +40,7 @@ let overallBudgetInMillions           = int ( overallBudget.Split(' ').[ 0 ].Rep
 let overallBoxOfficeRevenue           = overallFirstTablesRows.[ 16 ].``The Lord of the Rings 2``
 let overallBoxOfficeRevenueInMillions = float( overallBoxOfficeRevenue.Split(' ').[ 0 ].Replace( "$", "" )) * 1000.
 
-// List of Academy Award Nominations vs. Wins 
-
+(** List of Academy Award Nominations vs. Wins  **)
 // Fellowship of the Ring
 let forAcademyAwardsData  = lotrFilmSeriesProvider.Lists.``Academy Awards``.Values.[ 0 ]
 let forNominationsAndWins = forAcademyAwardsData.Split('-').[ 1 ].Split(':') // Urghh, couldn't generalize the algorithm.. :(
@@ -70,3 +68,36 @@ let rokWins               = getWinsData( rokNominationsAndWins )
 // Overall
 let overallNominations    = forNominations + ttNominations + rokNominations
 let overallWins           = forWins        + ttWins        + rokWins 
+
+let overallMovieInfo = { Name                       = "The Lord of the Rings Series";
+                         RuntimeInMinutes           = overallRunTimeInMinutes;
+                         BudgetInMillions           = overallBudgetInMillions;
+                         BoxOfficeRevenueInMillions = overallBoxOfficeRevenueInMillions;
+                         AcademyAwardNominations    = overallNominations;
+                         AcademyAwardWins           = overallWins; }
+
+(* Fellowship of the Ring Specific Data *)
+
+[<Literal>]
+let fellowshipOfTheRingWiki      = @"https://en.wikipedia.org/wiki/The_Lord_of_the_Rings:_The_Fellowship_of_the_Ring"
+type FellowshipOfTheRingProvider = HtmlProvider< fellowshipOfTheRingWiki > 
+let fellowshipOfTheRingProvider  = FellowshipOfTheRingProvider.Load( fellowshipOfTheRingWiki )
+
+(** Running Time, Budget and Box Office Revenue **)
+let forFirstTableRows   = fellowshipOfTheRingProvider.Tables.Table1.Rows
+
+let forRuntime          = forFirstTableRows.[ 12 ].``The Lord of the Rings: The Fellowship of the Ring 2``.Split(' ').[ 0 ]
+let forRuntimeInMinutes = int ( forRuntime )
+
+let forBudget           = forFirstTableRows.[ 15 ].``The Lord of the Rings: The Fellowship of the Ring 2``.Split(' ').[ 0 ].Replace("$", "")
+let forBudgetInMillions = int ( forBudget )
+
+let forBoxOfficeRevenue           = forFirstTableRows.[ 16 ].``The Lord of the Rings: The Fellowship of the Ring 2``.Split(' ').[ 0 ].Replace("$", "")
+let forBoxOfficeRevenueInMillions = float ( forBoxOfficeRevenue )
+
+let forMovieInfo =  { Name                       = "The Fellowship of the Ring";
+                      BudgetInMillions           = forBudgetInMillions;
+                      BoxOfficeRevenueInMillions = forBoxOfficeRevenueInMillions;
+                      RuntimeInMinutes           = forRuntimeInMinutes;
+                      AcademyAwardNominations    = forNominations;
+                      AcademyAwardWins           = forWins; }
