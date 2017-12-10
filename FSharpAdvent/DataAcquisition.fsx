@@ -8,6 +8,7 @@ type Race =
     | Elf
     | Dwarf
     | Human 
+    | Maiar
     | NotFound
 
 type CharacterInfo = { Name : string; Url : string; Race : Race }
@@ -150,11 +151,15 @@ let getRaceFromURL( c : CharacterInfo ) : CharacterInfo =
             let isHobbit : bool =
                 not ( doc.CssSelect( "aside.pi-theme-Hobbits").IsEmpty )
 
+            let isMaiar : bool = 
+                not ( doc.CssSelect( "aside.pi-theme-Maiar").IsEmpty )
+
             let getRace() = 
                 if   isHuman  then Human 
                 elif isHobbit then Hobbit
                 elif isElf    then Elf 
                 elif isDwarf  then Dwarf 
+                elif isMaiar  then Maiar
                 else NotFound
 
             let race = getRace()
