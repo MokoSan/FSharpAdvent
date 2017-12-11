@@ -37,12 +37,6 @@ let forNominations        = int ( forNominationsAndWins.[ 1 ].Split(',').[ 0 ].R
 let forWins               = int ( forNominationsAndWins.[ 2 ].Replace( " ", "" ))
 let forRottenTomatoes     = int ( lotrFilmSeriesProvider.Tables.``Public and critical response``.Rows.[ 0 ].``Rotten Tomatoes``.Split(' ').[0].Replace("%", ""))
 
-let getNominationData ( splitStrings : string[] ) : int =
-    int ( splitStrings.[ 1 ].Split(',').[ 0 ].Replace( " ", "" ))
-
-let getWinsData( splitStrings : string[] ) : int = 
-    int ( splitStrings.[ 2 ].Replace( " ", "" ))
-
 // The Two Towers
 let ttAcademyAwardsData   = lotrFilmSeriesProvider.Lists.``Academy Awards``.Values.[ 1 ]
 let ttNominationsAndWins  = ttAcademyAwardsData.Split('—').[ 1 ].Split(':')

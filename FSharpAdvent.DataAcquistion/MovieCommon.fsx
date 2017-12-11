@@ -16,9 +16,15 @@ type MovieInfo =
 [<Literal>]
 let movieOutputFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\Movies.csv"
 
-let appendHeaders = 
+let appendHeaders() = 
     File.AppendAllText( movieOutputFile , "Name,RuntimeInMinutes,BudgetInMillions,BoxOfficeRevenueInMillions,AcademyAwardNominations,AcademyAwardWins,RottenTomatoesScore\n" )
 
 let appendCsvLineToMovieOutput ( allMoviesCsv : string list ) : unit =
     allMoviesCsv
     |> List.iter( fun a -> File.AppendAllText( movieOutputFile, a ))
+
+let getNominationData ( splitStrings : string[] ) : int =
+    int ( splitStrings.[ 1 ].Split(',').[ 0 ].Replace( " ", "" ))
+
+let getWinsData( splitStrings : string[] ) : int = 
+    int ( splitStrings.[ 2 ].Replace( " ", "" ))
