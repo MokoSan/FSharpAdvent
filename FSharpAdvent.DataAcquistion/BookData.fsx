@@ -1,5 +1,9 @@
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll"
+
 open System
 open System.IO
+
+open Newtonsoft.Json
 
 type Book = 
     | TheFellowshipOfTheRing
@@ -13,6 +17,7 @@ type LotrData = { BookName    : Book;
 type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
 type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
 
+(*
 let charactersToGetMentionsFor = 
     [
         "Anborn"
@@ -69,8 +74,8 @@ let charactersToGetMentionsFor =
         "Éomer"
         "Éowyn"
 
-        "Erestor"
-        "Erkenbrand"
+       "Erestor"
+       "Erkenbrand"
 
        "Faramir" 
        "Fastred" 
@@ -173,9 +178,10 @@ let charactersToGetMentionsFor =
        "Wídfara"
        "Éothain"
     ]
+*)
 
 [<Literal>]
-let file = @"../Data/LotrBook.txt"
+let file = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\LotrBook.txt"
 
 let data = File.ReadAllText( file )
 let split = data.Split('<')
@@ -197,6 +203,15 @@ let allChapterData =
         let split2 = split1.[ 0 ].Split('~')
         { BookName = getBookName( split2.[ 0 ] ); ChapterName = split2.[ 1 ]; ChapterData = split1.[ 1 ].Trim() })
 
+let jsonizeAllChapterData : string = 
+    JsonConvert.SerializeObject ( allChapterData, Formatting.Indented )
+
+let bookDataJsonFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\LordOfTheRingsBook.json"
+
+let saveJsonData = 
+    File.WriteAllText ( bookDataJsonFile, jsonizeAllChapterData )
+
+
 let fellowshipOfTheRing =
     allChapterData
     |> Array.filter( fun a -> a.BookName = TheFellowshipOfTheRing )
@@ -208,6 +223,8 @@ let twoTowers =
 let returnOfTheKing =
     allChapterData
     |> Array.filter( fun a -> a.BookName = TheReturnOfTheKing )
+
+(* Persist the Book Data *)
 
 let splitValues = [| ' '; '.'; '-'; ','; '!' |]
 
@@ -307,7 +324,7 @@ let ttUniqueWordsPerChapter  = getUniqueWordsPerChapter( twoTowers )
 let rokUniqueWordsPerChapter = getUniqueWordsPerChapter( returnOfTheKing )
 
 (* Character Mentions *)
-
+let charactersToGetMentionsFor = [] // TODO: Fix the character list above.
 let characterMentions ( character : string ) ( book : LotrData[] )= 
     let characterMentions = 
         splitWords( book ) 
