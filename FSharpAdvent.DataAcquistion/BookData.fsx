@@ -1,7 +1,3 @@
-module LotrMovie
-
-open FSharp.Data
-
 open System
 open System.IO
 
@@ -14,8 +10,8 @@ type LotrData = { BookName    : Book;
                   ChapterName : string; 
                   ChapterData : string }
 
-type CharacterMentions     = { CharacterName : string; CharacterMentions : int; }
-type ChapterCharacterCount = { BookName : Book; Chapter : string; Count : int }
+type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
+type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
 
 let charactersToGetMentionsFor = 
     [
@@ -155,14 +151,13 @@ let charactersToGetMentionsFor =
        "Shelob"
        "Robin Smallburrow"
        "Snaga"
-       "Snaga (Two Towers orc)"
        "Targon"
        "The King of the Dead"
        "Thranduil"
        "Théoden"
        "Théodred"
-       "Adelard Took"
-       "Everard Took"
+       "Adelar"
+       "Everard"
        "Pippin"
        "Treebeard"
        "Daddy Twofoot"
@@ -174,14 +169,13 @@ let charactersToGetMentionsFor =
        "Willie Banks"
        "Windfola"
        "Witch-king of Angmar"
-       "Gríma Wormtongue"
+       "Gríma"
        "Wídfara"
        "Éothain"
-
     ]
 
 [<Literal>]
-let file = @"/Users/mukundraghavsharma/Desktop/F#/FSharpAdvent/Data/LotrBook.txt"
+let file = @"../Data/LotrBook.txt"
 
 let data = File.ReadAllText( file )
 let split = data.Split('<')
@@ -229,21 +223,23 @@ let splitWords( data : LotrData[] ) : string [] =
                                 .Replace("?", "")
                                 .Replace("'", ""))
         |> Array.filter( fun c -> c <> "'" && c <> "" && c <> "-" && c.Length <> 0 )
-    File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", splitAndCleaned)
+    //File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", splitAndCleaned)
 
     splitAndCleaned
 
 (* Word Counts *)
 
-let wordCount ( lines : string ) : int =
+let words ( lines : string ) : string[] = 
     let cleanedLines = 
         lines.Split( splitValues )
         |> Array.filter( fun c -> 
             c <> "'" && c <> "" && c <> "-" && c <> " " && c.Length <> 0 )
+    cleanedLines
 
+let wordCount ( lines : string ) : int =
     //printfn "%A" cleanedLines
-    File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", cleanedLines )
-    Array.length cleanedLines
+    //File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", cleanedLines )
+    Array.length ( words( lines )) 
 
 let totalWordCount = 
     splitWords( allChapterData )
@@ -261,15 +257,6 @@ let rokWordCount =
     splitWords( returnOfTheKing )
     |> Array.length
 
-(* Word Counts Per Chapter *)
-
-let getChapterCounts ( book : LotrData[] ) : ChapterCharacterCount[] = 
-    book
-    |> Array.map( fun c -> 
-    
-    )
-
-
 (* Unique Words *)
 
 let uniqueWords ( data : LotrData[] ) = 
@@ -277,15 +264,47 @@ let uniqueWords ( data : LotrData[] ) =
     |> Array.distinct
 
 let uniqueWordCount ( data : LotrData[] ) = 
-    let uniqueWordsInData = uniqueWords( data )
     uniqueWords( data )
     |> Array.length
 
-let allUniqueWords     = uniqueWords( allChapterData )
 let allUniqueWordCount = uniqueWordCount( allChapterData )
 let forUniqueWordCount = uniqueWordCount( fellowshipOfTheRing )
 let ttUniqueCount      = uniqueWordCount( twoTowers ) 
 let rokUniqueCount     = uniqueWordCount( returnOfTheKing )
+
+(* Word Counts Per Chapter *)
+
+let getChapterCounts ( book : LotrData[] ) : ChapterWordCount[] = 
+    book
+    |> Array.map( fun c -> 
+        { BookName = c.BookName; 
+          Chapter  = c.ChapterName; 
+          Count    = wordCount( c.ChapterData )})
+
+let allChapterCounts = getChapterCounts( allChapterData )
+let forChapterCounts = getChapterCounts( fellowshipOfTheRing )
+let ttChapterCounts  = getChapterCounts( twoTowers )
+let rokChapterCounts = getChapterCounts( returnOfTheKing )
+
+(* Unique Word Counts Per Chapter *)
+
+let getUniqueWordsPerChapter( book : LotrData[] ) : ChapterWordCount[] =
+    book
+    |> Array.map( fun c -> 
+        let allWords = words( c.ChapterData ) 
+        let uniqueWordCount =
+            allWords
+            |> Array.distinct
+            |> Array.length
+
+        { BookName = c.BookName; 
+          Chapter  = c.ChapterName; 
+          Count    = uniqueWordCount })
+
+let allUniqueWordsPerChapter = getUniqueWordsPerChapter( allChapterData )
+let forUniqueWordsPerChapter = getUniqueWordsPerChapter( fellowshipOfTheRing )
+let ttUniqueWordsPerChapter  = getUniqueWordsPerChapter( twoTowers )
+let rokUniqueWordsPerChapter = getUniqueWordsPerChapter( returnOfTheKing )
 
 (* Character Mentions *)
 
