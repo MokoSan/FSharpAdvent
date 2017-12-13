@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!--
+      The Lord of the Rings: An F# Approach - The Path of the Hobbits parameters will be replaced with the
+      document title extracted from the <h1> element or
+      file name, if there is no <h1> heading
+    -->
+    <title>Lord of the Rings: An F# Approach - The Path of the Hobbits</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles/style.css" />
+    <script src="styles/tips.js" type="text/javascript"></script>
+    
+    <script language="javascript" type="text/javascript">
+      function init()
+      {
+        try {
+          websocket = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/websocket");
+          websocket.onmessage = function(evt) { location.reload(); };
+        } catch (e) { /* silently ignore lack of websockets */ }
+      }
+      window.addEventListener("load", init, false);
+    </script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fslab.org">fslab.org</a></li>
+          <li><a href="http://fsharp.github.io/FSharp.Data/">F# Data</a></li>
+          <li><a href="http://bluemountaincapital.github.io/Deedle">Deedle</a></li>
+          <li><a href="http://bluemountaincapital.github.io/FSharpRProvider">R Provider</a></li>
+          <li><a href="http://tahahachana.github.io/XPlot/">XPlot</a></li>
+          <li><a href="http://www.mathdotnet.com/">Math.Net</a></li>
+        </ul>
+        <h3 class="muted">Journal</h3>
+      </div>
+      <hr />
+      <div class="row" style="margin-top:30px">
+        <div class="span1"></div>
+        <div class="span10" id="main">
+          <h1>Lord of the Rings: An F# Approach - The Path of the Hobbits</h1>
+<p>This path involves answering the two questions:</p>
+<p>Which movie series, The Lord of the Rings or The Hobbit, is the better movie series?</p>
+<p>Our Analysis involves comparing the following features of the two movies series:
+1.
+2.
+3.</p>
+<hr />
+<hr />
+<h2>Referencing the Libraries</h2>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">open</span> <span class="i">FSharp</span><span class="o">.</span><span class="i">Data</span>
+<span class="k">open</span> <span class="i">Deedle</span>
+<span class="k">open</span> <span class="i">System</span><span class="o">.</span><span class="i">IO</span>
+<span class="k">open</span> <span class="i">XPlot</span><span class="o">.</span><span class="i">GoogleCharts</span>
+<span class="k">open</span> <span class="i">XPlot</span><span class="o">.</span><span class="i">GoogleCharts</span><span class="o">.</span><span class="i">Deedle</span>
+</code></pre></td>
+</tr>
+</table>
+<h2>Movie Series Comparison</h2>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp">[&lt;<span class="i">Literal</span>&gt;]
+<span class="k">let</span> <span class="i">moviesFile</span> <span class="o">=</span> <span class="k">__SOURCE_DIRECTORY__</span><span class="o">+</span>  <span class="s">@&quot;\..\Data\Movies.csv&quot;</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>No output has been produced.</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">(** Let&#39;s add the Csv data into a Deedle Data Frame **)</span> 
+<span class="k">let</span> <span class="i">moviesDf</span> <span class="o">:</span> <span class="i">Frame</span><span class="o">&lt;</span> <span class="i">int</span>, <span class="i">string</span> <span class="o">&gt;</span> <span class="o">=</span> <span class="i">Frame</span><span class="o">.</span><span class="i">ReadCsv</span>( <span class="i">moviesFile</span> )
+
+<span class="c">// Let&#39;s set the index oto that of the </span>
+<span class="k">let</span> <span class="i">indexedMoviesDf</span> <span class="o">=</span> 
+    <span class="i">moviesDf</span>
+    <span class="o">|&gt;</span> <span class="i">Frame</span><span class="o">.</span><span class="i">indexRowsString</span> <span class="s">&quot;Name&quot;</span>
+
+<span class="k">let</span> <span class="i">movieSeriesDf</span> <span class="o">=</span>
+    <span class="i">indexedMoviesDf</span>
+    <span class="o">|&gt;</span> <span class="i">Frame</span><span class="o">.</span><span class="i">sliceRows</span>[ <span class="s">&quot;The Lord of the Rings Series&quot;</span>; <span class="s">&quot;The Hobbit Series&quot;</span>]
+
+<span class="k">let</span> <span class="i">profitDf</span> <span class="o">=</span> 
+    <span class="i">movieSeriesDf</span>
+    <span class="o">|&gt;</span> <span class="i">Frame</span><span class="o">.</span><span class="i">sliceCols</span> [ <span class="s">&quot;BudgetInMillions&quot;</span>;  <span class="s">&quot;BoxOfficeRevenueInMillions&quot;</span> ]
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Chart</span><span class="o">.</span><span class="i">Column</span>( <span class="i">profitDf</span> )
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithTitle</span> <span class="s">&quot;Budget and Revenue Comparision&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithXTitle</span> <span class="s">&quot;Series Name&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithYTitle</span> <span class="s">&quot;$ [ In Millions ]&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithLegend</span> <span class="k">true</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">Show</span>
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="i">profitSeries</span> <span class="o">:</span> <span class="i">Series</span><span class="o">&lt;</span> <span class="i">string</span>, <span class="i">float</span> <span class="o">&gt;</span> <span class="o">=</span> 
+    <span class="i">profitDf</span><span class="o">?</span><span class="i">BoxOfficeRevenueInMillions</span> <span class="o">-</span> <span class="i">profitDf</span><span class="o">?</span><span class="i">BudgetInMillions</span>
+
+<span class="k">let</span> <span class="i">rateOfReturnSeries</span> <span class="o">:</span> <span class="i">Series</span><span class="o">&lt;</span> <span class="i">string</span>, <span class="i">float</span> <span class="o">&gt;</span> <span class="o">=</span>
+    (( <span class="i">profitDf</span><span class="o">?</span><span class="i">BoxOfficeRevenueInMillions</span> <span class="o">-</span> <span class="i">profitDf</span><span class="o">?</span><span class="i">BudgetInMillions</span> ) <span class="o">/</span> <span class="i">profitDf</span><span class="o">?</span><span class="i">BudgetInMillions</span> ) <span class="o">*</span> <span class="n">100.0</span>
+
+<span class="c">// Feature Engineering.</span>
+<span class="i">profitDf</span><span class="o">.</span><span class="i">AddColumn</span>( <span class="s">&quot;Profit [Mill. $]&quot;</span>, <span class="i">profitSeries</span> )
+<span class="i">profitDf</span>
+
+<span class="i">profitDf</span><span class="o">.</span><span class="i">RenameColumn</span>( <span class="s">&quot;BudgetInMillions&quot;</span>, <span class="s">&quot;Budget [Mill. $]&quot;</span>)
+<span class="i">profitDf</span><span class="o">.</span><span class="i">RenameColumn</span>( <span class="s">&quot;BoxOfficeRevenueInMillions&quot;</span>, <span class="s">&quot;Box Office Revenue [Mill. $]&quot;</span>)
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">Chart</span><span class="o">.</span><span class="i">Column</span>( <span class="i">profitDf</span> )
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithTitle</span> <span class="s">&quot;Budget, Revenue and Profit&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithXTitle</span> <span class="s">&quot;Series&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithYTitle</span> <span class="s">&quot;$ [ In Millions ]&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithLegend</span> <span class="k">true</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">Show</span>
+
+<span class="c">// Adding the Rate of Return</span>
+<span class="i">profitDf</span><span class="o">.</span><span class="i">AddColumn</span>( <span class="s">&quot;Rate of Return in %&quot;</span>, <span class="i">rateOfReturnSeries</span> )
+<span class="k">let</span> <span class="i">rateOfReturnDf</span> <span class="o">=</span>
+    <span class="i">profitDf</span>
+    <span class="o">|&gt;</span> <span class="i">Frame</span><span class="o">.</span><span class="i">sliceCols</span> [ <span class="s">&quot;Rate of Return in %&quot;</span> ]
+
+<span class="i">Chart</span><span class="o">.</span><span class="i">Column</span>( <span class="i">rateOfReturnDf</span> )
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithTitle</span> <span class="s">&quot;Rate of Return&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithXTitle</span> <span class="s">&quot;Series&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithYTitle</span> <span class="s">&quot;Rate of Return in %&quot;</span>
+<span class="o">|&gt;</span> <span class="i">Chart</span><span class="o">.</span><span class="i">WithLegend</span> <span class="k">true</span>
+    
+</code></pre></td>
+</tr>
+</table>
+<table class="pre"><tr><td><pre><code>No value has been returned</code></pre></td></tr></table>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// Charting the Budgets</span>
+
+<span class="c">// Charting the Budgets</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Now, let's build the chart.</p>
+<h2>Summary</h2>
+<p>An image is worth a thousand words:</p>
+<p><img src="http://imgs.xkcd.com/comics/hofstadter.png" alt="" /></p>
+
+
+          
+        </div>
+        <div class="span1"></div>
+      </div>
+      <hr style="margin-top:50px;"/>
+      <footer class="footer" style="text-align:center">
+        Brought to you by the <a href="http://fsharp.org/technical-groups/">F# Data Science working group</a> and <a href="http://twitter.com/fslaborg">@fslaborg</a>.<br />
+        Submit <a href="https://github.com/fslaborg/FsLab">feedback on GitHub</a> and help us improve FsLab!
+      </footer>
+    </div>
+  </body>
+</html>

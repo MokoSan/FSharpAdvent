@@ -54,7 +54,8 @@
     <None Include="paket.dependencies" />
     <None Include="build.fsx" />
     <Compile Include="Runner.fs" />
-    <None Include="PathOfTheKing.fsx" />
+    <None Include="ThePathOfTheKing.fsx" />
+    <None Include="ThePathOfTheHobbits.fsx" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
