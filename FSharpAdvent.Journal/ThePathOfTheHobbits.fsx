@@ -51,7 +51,64 @@ let movieSeriesDf =
     indexedMoviesDf
     |> Frame.sliceRows[ "The Lord of the Rings Series"; "The Hobbit Series"]
 
-// Feature 1: Rate of Return.
+// Feature 1: Rotten Tomatoes 
+let rottenTomatoesScoreDf = 
+    movieSeriesDf
+    |> Frame.sliceCols [ "RottenTomatoesScore";  ]
+
+Chart.Table rottenTomatoesScoreDf
+
+// Feature 2: Academy Award - Wins / Nominations
+let academyAwardsDf = 
+    movieSeriesDf
+    |> Frame.sliceCols [ "AcademyAwardNominations";  "AcademyAwardWins" ]
+
+let academyAwardLosses = 
+    academyAwardsDf?AcademyAwardNominations - academyAwardsDf?AcademyAwardWins
+
+academyAwardsDf.AddColumn( "AcademyAwardLoses", academyAwardLosses )
+
+let lotrAcademyAwardsDf =
+    academyAwardsDf
+    |> Frame.sliceRows [ "The Lord of the Rings Series" ]
+
+lotrAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
+
+let lotrAcademyAwardWins = 
+    lotrAcademyAwardsDf?AcademyAwardWins.Values
+    |> Seq.item 0
+
+let lotrAcademyAwardLosses = 
+    lotrAcademyAwardsDf?AcademyAwardLoses.Values
+    |> Seq.item 0
+
+let lotrAcademyAwardPieChart = 
+    [ "Wins", lotrAcademyAwardWins; "Loses", lotrAcademyAwardLosses ]
+    |> Chart.Pie
+    |> Chart.WithTitle "The Lord of the Rings - Academy Awards Wins vs. Losses"
+    |> Chart.WithLegend true
+
+let hobbitAcademyAwardsDf =
+    academyAwardsDf
+    |> Frame.sliceRows [ "The Hobbit Series" ]
+
+hobbitAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
+
+let hobbitAcademyAwardWins = 
+    hobbitAcademyAwardsDf?AcademyAwardWins.Values
+    |> Seq.item 0
+
+let hobbitAcademyAwardLosses = 
+    hobbitAcademyAwardsDf?AcademyAwardLoses.Values
+    |> Seq.item 0
+
+let hobbitAcademyAwardPieChart = 
+    [ "Wins", hobbitAcademyAwardWins; "Loses", hobbitAcademyAwardLosses ]
+    |> Chart.Pie
+    |> Chart.WithTitle "The Hobbit - Academy Awards Wins vs. Losses"
+    |> Chart.WithLegend true
+
+// Feature 3: Rate of Return.
 let profitDf = 
     movieSeriesDf
     |> Frame.sliceCols [ "BudgetInMillions";  "BoxOfficeRevenueInMillions" ]
@@ -106,63 +163,7 @@ profitDf
 
 (*** include-it:chart ***)
 
-// Feature 2: Academy Award - Wins / Nominations
-let academyAwardsDf = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "AcademyAwardNominations";  "AcademyAwardWins" ]
 
-let academyAwardLosses = 
-    academyAwardsDf?AcademyAwardNominations - academyAwardsDf?AcademyAwardWins
-
-academyAwardsDf.AddColumn( "AcademyAwardLoses", academyAwardLosses )
-
-let lotrAcademyAwardsDf =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Lord of the Rings Series" ]
-
-lotrAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
-
-let lotrAcademyAwardWins = 
-    lotrAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.item 0
-
-let lotrAcademyAwardLosses = 
-    lotrAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.item 0
-
-let lotrAcademyAwardPieChart = 
-    [ "Wins", lotrAcademyAwardWins; "Loses", lotrAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Lord of the Rings - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-
-let hobbitAcademyAwardsDf =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Hobbit Series" ]
-
-hobbitAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
-
-let hobbitAcademyAwardWins = 
-    hobbitAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.item 0
-
-let hobbitAcademyAwardLosses = 
-    hobbitAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.item 0
-
-let hobbitAcademyAwardPieChart = 
-    [ "Wins", hobbitAcademyAwardWins; "Loses", hobbitAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Hobbit - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-
-// Feature 3: Rotten Tomatoes 
-let rottenTomatoesScoreDf = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "RottenTomatoesScore";  ]
-
-Chart.Table rottenTomatoesScoreDf
-    
 (**
 Summary
 -------
