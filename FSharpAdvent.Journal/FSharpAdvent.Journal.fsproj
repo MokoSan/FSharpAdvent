@@ -54,7 +54,7 @@
     <None Include="paket.dependencies" />
     <None Include="build.fsx" />
     <Compile Include="Runner.fs" />
-    <None Include="ThePathOfTheKing.fsx" />
+    <None Include="ThePathOfTheWizard.fsx" />
     <None Include="ThePathOfTheHobbits.fsx" />
   </ItemGroup>
   <PropertyGroup>
