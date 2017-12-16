@@ -52,41 +52,54 @@ Loading the Character Data into the Journal
 
 [<Literal>]
 let lotrCharacterDataFilePath = __SOURCE_DIRECTORY__+  @"\..\Data\Characters.csv"
+type LotrCsvProvider          = CsvProvider< lotrCharacterDataFilePath >
+let lotrCsvProvider           = LotrCsvProvider.Load( lotrCharacterDataFilePath ) 
 
-(** Load the Character File from the Data Folder in the CSV Type Provider. **)
-type LotrCsvProvider = CsvProvider< lotrCharacterDataFilePath >
-let lotrCsvProvider  = LotrCsvProvider.Load( lotrCharacterDataFilePath ) 
+let lotrCsvDf : Frame< int, string > 
+    = Frame.ReadCsv( lotrCharacterDataFilePath )
 
-(*** include-output:loading ***)
-(** Additionally, let's add the Csv data into a Deedle Data Frame **) 
-let lotrCsvDf = Frame.ReadCsv( lotrCharacterDataFilePath )
+let lotrCsvDfCleaned : Frame< string, string > =  
+    lotrCsvDf
+    |> Frame.indexRowsString "Name"
+    |> Frame.dropCol "Url"
 
-(*** define-output:chart ***)
 let options = Options( page = "enable", pageSize = 20 )
-lotrCsvDf
+lotrCsvDfCleaned
 |> Chart.Table
 |> Chart.WithOptions options
 |> Chart.Show
 
-(*** include-it:chart ***)
+let races = [ "Human"; "Hobbit"; "Elf"; "Dwarf"; "Maiar" ]
 
-let characterToRaceSeries = 
-    lotrCsvProvider.Rows
-    |> Seq.map( fun r -> r.Name, r.Race )
-    |> Seq.groupBy ( fun (_, r) -> r )
-    |> series
-printfn "%A" characterToRaceSeries
+let getSeriesByRaceName ( race : string ) : Series< string, string > = 
+    lotrCsvDfCleaned.GetColumn "Race"
+    |> Series.filterValues( (=) race )
 
-(** Now, let's build the chart. *)
-(*** define-output:chart ***)
-(*
-words
-|> Series.sort
-|> Series.rev
-|> Series.take 6
+let getSeriesByRaceCount ( race : string ) : int = 
+    getSeriesByRaceName race |> Series.countKeys
+
+let raceCountDf : Frame<string, string> = 
+    let allRaceCountSeries = 
+        races
+        |> List.map( fun r -> "Race", r, getSeriesByRaceCount r )
+        |> Seq.ofList
+
+    allRaceCountSeries
+    |> Frame.ofValues
+
+raceCountDf
 |> Chart.Column
-*)
-(*** include-it:chart ***)
+|> Chart.WithTitle "Distribution of Characters by Race"
+|> Chart.WithYTitle "Count"
+|> Chart.WithLegend true
+|> Chart.Show
+
+raceCountDf
+|> Chart.Table
+
+// Fool of a Took
+
+
 
 (**
 Summary
