@@ -10,9 +10,9 @@ This path involves answering the two questions:
 Which movie series, The Lord of the Rings or The Hobbit, is the better movie series?
 
 Our Analysis involves comparing the following features of the two movies series:
-1. Rate of Return [ Appeals to the Movie Production ] 
-2. Oscar Nominations [ Appeals to the Critics ]
-3. Rotten Tomatoes  
+1. Rotten Tomatoes
+2. Return on Investment
+3. Oscar Nominations
 
 ----------
 
@@ -58,57 +58,7 @@ let rottenTomatoesScoreDf =
 
 Chart.Table rottenTomatoesScoreDf
 
-// Feature 2: Academy Award - Wins / Nominations
-let academyAwardsDf = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "AcademyAwardNominations";  "AcademyAwardWins" ]
-
-let academyAwardLosses = 
-    academyAwardsDf?AcademyAwardNominations - academyAwardsDf?AcademyAwardWins
-
-academyAwardsDf.AddColumn( "AcademyAwardLoses", academyAwardLosses )
-
-let lotrAcademyAwardsDf =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Lord of the Rings Series" ]
-
-lotrAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
-
-let lotrAcademyAwardWins = 
-    lotrAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.item 0
-
-let lotrAcademyAwardLosses = 
-    lotrAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.item 0
-
-let lotrAcademyAwardPieChart = 
-    [ "Wins", lotrAcademyAwardWins; "Loses", lotrAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Lord of the Rings - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-
-let hobbitAcademyAwardsDf =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Hobbit Series" ]
-
-hobbitAcademyAwardsDf.DropColumn( "AcademyAwardNominations" )
-
-let hobbitAcademyAwardWins = 
-    hobbitAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.item 0
-
-let hobbitAcademyAwardLosses = 
-    hobbitAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.item 0
-
-let hobbitAcademyAwardPieChart = 
-    [ "Wins", hobbitAcademyAwardWins; "Loses", hobbitAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Hobbit - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-
-// Feature 3: Rate of Return.
+// Feature 2: Return on Investment.
 let profitDf = 
     movieSeriesDf
     |> Frame.sliceCols [ "BudgetInMillions";  "BoxOfficeRevenueInMillions" ]
@@ -124,17 +74,18 @@ Chart.Column( profitDf )
 
 (*** include-it:chart ***)
 
+// Adding the Return on Investment
+let roiSeries : Series< string, float > =
+    (( profitDf?BoxOfficeRevenueInMillions - profitDf?BudgetInMillions )
+        / profitDf?BudgetInMillions ) * 100.0
+
 let profitSeries : Series< string, float > = 
     profitDf?BoxOfficeRevenueInMillions - profitDf?BudgetInMillions
 
-let rateOfReturnSeries : Series< string, float > =
-    (( profitDf?BoxOfficeRevenueInMillions - profitDf?BudgetInMillions ) / profitDf?BudgetInMillions ) * 100.0
-
 profitDf.AddColumn( "Profit [Mill. $]", profitSeries )
-profitDf
 
 profitDf.RenameColumn( "BudgetInMillions", "Budget [Mill. $]")
-profitDf.RenameColumn( "BoxOfficeRevenueInMillions", "Box Office Revenue [Mill. $]")
+profitDf.RenameColumn( "BoxOfficeRevenueInMillions", "Box Office Revenue  [Mill. $]")
 
 (*** define-output:chart ***)
 
@@ -145,24 +96,94 @@ Chart.Column( profitDf )
 |> Chart.WithLegend true
 |> Chart.Show
 
-// Adding the Rate of Return
-profitDf.AddColumn( "Rate of Return in %", rateOfReturnSeries )
-let rateOfReturnDf =
-    profitDf
-    |> Frame.sliceCols [ "Rate of Return in %" ]
 
-Chart.Column( rateOfReturnDf )
-|> Chart.WithTitle "Rate of Return"
+profitDf.AddColumn( "ROI in %", roiSeries )
+
+let roiDf : Frame< string, string > =
+    profitDf
+    |> Frame.sliceCols [ "ROI in %" ]
+
+Chart.Column( roiDf )
+|> Chart.WithTitle "Return on Investment"  
 |> Chart.WithXTitle "Series"
-|> Chart.WithYTitle "Rate of Return in %"
-|> Chart.WithOptions( Options( colors = [| "red" |] ))
+|> Chart.WithYTitle "ROI [ % ]"
 |> Chart.WithLegend true
  
 profitDf
 |> Chart.Table
 
-(*** include-it:chart ***)
+// Feature 3: Academy Award - Wins / Nominations
+let academyAwardsDf : Frame< string, string > = 
+    movieSeriesDf
+    |> Frame.sliceCols [ "AcademyAwardNominations";  "AcademyAwardWins" ]
 
+let academyAwardLosses : Series< string, float > = 
+    academyAwardsDf?AcademyAwardNominations - academyAwardsDf?AcademyAwardWins
+
+academyAwardsDf.AddColumn( "AcademyAwardLoses", academyAwardLosses )
+
+let lotrAcademyAwardsDf : Frame< string, string > =
+    academyAwardsDf
+    |> Frame.sliceRows [ "The Lord of the Rings Series" ]
+
+let lotrAcademyAwardWins : float = 
+    lotrAcademyAwardsDf?AcademyAwardWins.Values
+    |> Seq.head
+
+let lotrAcademyAwardLosses : float = 
+    lotrAcademyAwardsDf?AcademyAwardLoses.Values
+    |> Seq.head
+
+let lotrAcademyAwardPieChart : GoogleChart = 
+    [ "Wins", lotrAcademyAwardWins; "Loses", lotrAcademyAwardLosses ]
+    |> Chart.Pie
+    |> Chart.WithTitle "The Lord of the Rings - Academy Awards Wins vs. Losses"
+    |> Chart.WithLegend true
+lotrAcademyAwardPieChart
+
+let hobbitAcademyAwardsDf : Frame< string, string > =
+    academyAwardsDf
+    |> Frame.sliceRows [ "The Hobbit Series" ]
+
+let hobbitAcademyAwardWins : float = 
+    hobbitAcademyAwardsDf?AcademyAwardWins.Values
+    |> Seq.head
+
+let hobbitAcademyAwardLosses : float = 
+    hobbitAcademyAwardsDf?AcademyAwardLoses.Values
+    |> Seq.head
+
+let hobbitAcademyAwardPieChart : GoogleChart = 
+    [ "Wins", hobbitAcademyAwardWins; "Loses", hobbitAcademyAwardLosses ]
+    |> Chart.Pie
+    |> Chart.WithTitle "The Hobbit - Academy Awards Wins vs. Losses"
+    |> Chart.WithLegend true
+hobbitAcademyAwardPieChart
+
+let academyAwardWinPercentageSeries : Series< string, float > = 
+    ( academyAwardsDf?AcademyAwardWins 
+        / academyAwardsDf?AcademyAwardNominations ) * 100.0 
+
+academyAwardsDf.AddColumn( "AcademyAwardWinPercentage", academyAwardWinPercentageSeries )
+
+let academyAwardWinsDf : Frame< string, string > = 
+    let academyAwardWinsDf = 
+        academyAwardsDf 
+        |> Frame.sliceCols [ "AcademyAwardWinPercentage" ]
+
+    academyAwardWinsDf.RenameColumn( "AcademyAwardWinPercentage", "Wins %")
+    academyAwardWinsDf
+    
+
+Chart.Column( academyAwardWinsDf )
+|> Chart.WithTitle "Academy Awards Wins %"  
+|> Chart.WithXTitle "Series"
+|> Chart.WithYTitle "Wins [ % ]"
+|> Chart.WithLegend true
+
+// Result Df.
+
+(*** include-it:chart ***)
 
 (**
 Summary
