@@ -171,7 +171,7 @@ let lotrJsonFile = @"..\Data\LordOfTheRingsBook.json"
 [<Literal>]
 let hobbitBookTxt = @"..\Data\Hobbit.txt"
 [<Literal>]
-let hobbitJsonFile = @"..\Data\Hobbit.json"
+let hobbitJsonFile = @"..\Data\HobbitBook.json"
 
 (* Persist the Books Data Into JSON Form *)
 

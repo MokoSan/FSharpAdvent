@@ -30,18 +30,18 @@ Movie Series Comparison
 open Newtonsoft.Json
 
 [<Literal>]
-let lotrBookFilePath = __SOURCE_DIRECTORY__+  @"..\Data\LordOfTheRingsBook.json"
+let lotrBookFilePath = __SOURCE_DIRECTORY__+  @"\..\Data\LordOfTheRingsBook.json"
 
 [<Literal>]
-let hobbitBookFilePath = __SOURCE_DIRECTORY__ + @"..\Data\HobbitBook.json"
+let hobbitBookFilePath = __SOURCE_DIRECTORY__ + @"\..\Data\HobbitBook.json"
 
-let allLOTRText     = File.ReadAllText lotrBookFilePath
-let allLOTRBookData = JsonConvert.DeserializeObject< BookData[] >( allLOTRText ) 
+let allLOTRText       = File.ReadAllText lotrBookFilePath
+let allLOTRBookData   = JsonConvert.DeserializeObject< BookData[] >( allLOTRText ) 
 
-type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
-type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
+let allHobbitText     = File.ReadAllText hobbitBookFilePath
+let allHobbitBookData = JsonConvert.DeserializeObject< BookData[] >( allHobbitText ) 
 
-(* Seggregate Books *)
+(* Seggregate Books The LOTR Books *)
 
 let fellowshipOfTheRingBookData : BookData[] =
     allLOTRBookData 
@@ -77,7 +77,7 @@ let splitWords( data : BookData[] ) : string [] =
         |> Array.filter( fun c -> c <> "'" && c <> "" && c <> "-" && c.Length <> 0 )
     splitAndCleaned
 
-let totalWordCount = 
+let totalLOTRWordCount = 
     splitWords( allLOTRBookData )
     |> Array.length
 
@@ -95,6 +95,8 @@ let rokWordCount =
 
 (* Word Counts Per Chapter *)
 
+type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
+
 let getChapterCounts ( book : BookData[] ) : ChapterWordCount[] = 
     book
     |> Array.map( fun c -> 
@@ -108,6 +110,8 @@ let ttChapterCounts  = getChapterCounts( twoTowersBookData )
 let rokChapterCounts = getChapterCounts( returnOfTheKingBookData )
 
 (* Character Mentions *)
+
+type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
 
 let lotrImportantCharacters = 
     [
