@@ -116,12 +116,122 @@ lotrCharacterDf.AddColumn ( "FirstName", firstName )
 lotrCharacterDf.DropColumn "Url"
 lotrCharacterDf.DropColumn "Name"
 
-let filterdCharacterDf : Frame < int, string > = 
+let filteredCharacterDf : Frame < int, string > = 
     lotrCharacterDf
     |> Frame.filterRowValues ( fun r -> r.GetAs< string >( "Race" ) <> "Maiar" )
 
+let inputs : string[] =
+    filteredCharacterDf
+    |> Frame.getCol "FirstName"
+    |> Series.values
+    |> Seq.toArray
 
+let outputs : int[] = 
+    filteredCharacterDf
+    |> Frame.getCol "Race"
+    |> Series.values
+    |> Seq.toArray
+    |> Array.map( fun o -> 
+        match o with
+        | "Human"  -> 0
+        | "Hobbit" -> 1
+        | "Elf"    -> 2
+        | "Dwarf"  -> 3
+    )
 
+let inputsAndOutputsCombined = 
+    Array.zip inputs outputs
+
+let raceCount : int = races.Length 
+
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Accord.3.8.0\lib\net45\Accord.dll"
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Accord.MachineLearning.3.8.0\lib\net45\Accord.MachineLearning.dll"
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Accord.Math.3.8.0\lib\net45\Accord.Math.dll"
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Accord.Math.3.8.0\lib\net45\Accord.Math.Core.dll"
+#r @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\packages\Accord.Statistics.3.8.0\lib\net45\Accord.Statistics.dll"
+
+open Accord.Math.Distances
+open Accord.MachineLearning
+open Accord.Statistics.Analysis
+
+open System
+open MathNet.Numerics.Random
+
+// Data Partitioning
+
+[<Literal>]
+let trainingDataSplit = 0.8
+
+// Splitting Training and Testing data set
+let totalNumberOfDataPoints = inputs.Length 
+
+let combinedDataIdx =  
+    let random = Random.doublesSeed 100 totalNumberOfDataPoints 
+    let training =
+        random
+        |> Array.mapi( fun i r -> i, r < trainingDataSplit )
+
+    let testing = 
+        random
+        |> Array.mapi( fun i r -> i, r > trainingDataSplit )
+
+    training, testing 
+
+let trainingData =
+    let getAllFilteredTrainingData =
+        ( fst combinedDataIdx )
+        |> Array.filter( fun ( r,i ) -> ( i ))
+        |> Array.map( fun ( r, i ) -> r ) 
+
+    getAllFilteredTrainingData
+    |> Array.map( fun r -> inputsAndOutputsCombined.[ r ])
+
+let testingData = 
+    let getAllFilteredTestingData =
+        ( snd combinedDataIdx )
+        |> Array.filter( fun ( r,i ) -> ( i ))
+        |> Array.map( fun ( r, i ) -> r ) 
+
+    getAllFilteredTestingData 
+    |> Array.map( fun r -> inputsAndOutputsCombined.[ r ])
+
+let trainingDataInput =
+    trainingData
+    |> Array.map( fun d -> fst d )
+
+let trainingDataOutput =
+    trainingData
+    |> Array.map( fun d -> snd d )
+
+let testingDataInput =
+    trainingData
+    |> Array.map( fun d -> fst d )
+
+let testingDataOutput =  
+    trainingData
+    |> Array.map( fun d -> snd d )
+    
+// Learning phase should be based on the Training Data 
+let knn           = KNearestNeighbors< string >( k = raceCount, distance = Levenshtein() )
+let knnLearnt     = knn.Learn( trainingDataInput, trainingDataOutput )
+
+let classificationResultWrapper ( name : string ) 
+                                ( knn : KNearestNeighbors< string > ) : string = 
+    let decidedClass = knn.Decide( name )
+    match decidedClass with
+        | 0 -> "Human" 
+        | 1 -> "Hobbit"
+        | 2 -> "Elf" 
+        | 3 -> "Dwarf"
+        | _ -> failwith "Class not found"
+
+classificationResultWrapper "Ardamir" knnLearnt
+
+// Confusion Matrix should be based on the Testing Data 
+let confusionMatrix = GeneralConfusionMatrix.Estimate( knnLearnt, testingDataInput, testingDataOutput )
+let accuracy        = confusionMatrix.Accuracy
+let error           = confusionMatrix.Error
+let kappa           = confusionMatrix.Kappa
 
 (**
 Summary
