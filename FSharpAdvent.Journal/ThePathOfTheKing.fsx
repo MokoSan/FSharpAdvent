@@ -1,18 +1,10 @@
 (*** hide ***)
 #load "packages/FsLab/FsLab.fsx"
+#load @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\FSharpAdvent.DataAcquistion\BookData.fsx"
 (**
 
-Lord of the Rings: An F# Approach - The Path of the Hobbits
+Lord of the Rings: An F# Approach - The Path of the King 
 ===========================================================
-
-This path involves answering the two questions:
-
-Which movie series, The Lord of the Rings or The Hobbit, is the better movie series?
-
-Our Analysis involves comparing the following features of the two movies series:
-1. Rotten Tomatoes
-2. Return on Investment
-3. Oscar Nominations
 
 ----------
 
@@ -35,153 +27,130 @@ Movie Series Comparison
 -------------------------------------------
 *)
 
+open Newtonsoft.Json
+
 [<Literal>]
-let moviesFile = __SOURCE_DIRECTORY__+  @"\..\Data\Movies.csv"
+let lotrBookFilePath = __SOURCE_DIRECTORY__+  @"..\Data\LordOfTheRingsBook.json"
 
-(*** include-output:loading ***)
-(** Let's add the Csv data into a Deedle Data Frame **) 
-let moviesDf : Frame< int, string > = Frame.ReadCsv( moviesFile )
+[<Literal>]
+let hobbitBookFilePath = __SOURCE_DIRECTORY__ + @"..\Data\HobbitBook.json"
 
-// Let's set the index oto that of the 
-let indexedMoviesDf = 
-    moviesDf
-    |> Frame.indexRowsString "Name"
+let allLOTRText     = File.ReadAllText lotrBookFilePath
+let allLOTRBookData = JsonConvert.DeserializeObject< BookData[] >( allLOTRText ) 
 
-let movieSeriesDf =
-    indexedMoviesDf
-    |> Frame.sliceRows[ "The Lord of the Rings Series"; "The Hobbit Series"]
+type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
+type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
 
-// Feature 1: Rotten Tomatoes 
-let rottenTomatoesScoreDf = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "RottenTomatoesScore";  ]
+(* Seggregate Books *)
 
-Chart.Table rottenTomatoesScoreDf
+let fellowshipOfTheRingBookData : BookData[] =
+    allLOTRBookData 
+    |> Array.filter( fun a -> a.BookName = TheFellowshipOfTheRing )
 
-// Feature 2: Return on Investment.
-let profitDf = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "BudgetInMillions";  "BoxOfficeRevenueInMillions" ]
+let twoTowersBookData : BookData[]  =
+    allLOTRBookData 
+    |> Array.filter( fun a -> a.BookName = TheTwoTowers )
 
-(*** define-output:chart ***)
+let returnOfTheKingBookData : BookData[] =
+    allLOTRBookData 
+    |> Array.filter( fun a -> a.BookName = TheReturnOfTheKing )
 
-Chart.Column( profitDf )
-|> Chart.WithTitle "Budget and Revenue Comparision"
-|> Chart.WithXTitle "Series Name"
-|> Chart.WithYTitle "$ [ In Millions ]"
-|> Chart.WithLegend true
-|> Chart.Show
+(* Word Counts *) 
 
-(*** include-it:chart ***)
+let splitValues = [| ' '; '.'; '-'; ','; '!' |]
+let splitWords( data : BookData[] ) : string [] =
 
-// Adding the Return on Investment
-let roiSeries : Series< string, float > =
-    (( profitDf?BoxOfficeRevenueInMillions - profitDf?BudgetInMillions )
-        / profitDf?BudgetInMillions ) * 100.0
+    let cleanString ( input : string ) : string = 
+        input.Replace("`", "")
+             .Replace("'", "")
+             .Replace("-", "")
+             .Replace(";", "")
+             .Replace("?", "")
+             .Replace("'", "")
+             .Replace("\"", "")
+        
+    let splitAndCleaned = 
+        data 
+        |> Array.collect( fun c -> 
+            c.ChapterData.Trim().Split( splitValues ))
+        |> Array.map( fun c -> cleanString( c )) 
+        |> Array.filter( fun c -> c <> "'" && c <> "" && c <> "-" && c.Length <> 0 )
+    splitAndCleaned
 
-let profitSeries : Series< string, float > = 
-    profitDf?BoxOfficeRevenueInMillions - profitDf?BudgetInMillions
+let totalWordCount = 
+    splitWords( allLOTRBookData )
+    |> Array.length
 
-profitDf.AddColumn( "Profit [Mill. $]", profitSeries )
+let forWordCount = 
+    splitWords( fellowshipOfTheRingBookData )
+    |> Array.length
 
-profitDf.RenameColumn( "BudgetInMillions", "Budget [Mill. $]")
-profitDf.RenameColumn( "BoxOfficeRevenueInMillions", "Box Office Revenue  [Mill. $]")
+let ttWordCount = 
+    splitWords( twoTowersBookData )
+    |> Array.length
 
-(*** define-output:chart ***)
+let rokWordCount = 
+    splitWords( returnOfTheKingBookData )
+    |> Array.length
 
-Chart.Column( profitDf )
-|> Chart.WithTitle "Budget, Revenue and Profit"
-|> Chart.WithXTitle "Series"
-|> Chart.WithYTitle "$ [ In Millions ]"
-|> Chart.WithLegend true
-|> Chart.Show
+(* Word Counts Per Chapter *)
 
+let getChapterCounts ( book : BookData[] ) : ChapterWordCount[] = 
+    book
+    |> Array.map( fun c -> 
+        { BookName = c.BookName; 
+          Chapter  = c.ChapterName; 
+          Count    = wordCount( c.ChapterData )})
 
-profitDf.AddColumn( "ROI in %", roiSeries )
+let allChapterCounts = getChapterCounts( allLOTRBookData )
+let forChapterCounts = getChapterCounts( fellowshipOfTheRingBookData )
+let ttChapterCounts  = getChapterCounts( twoTowersBookData )
+let rokChapterCounts = getChapterCounts( returnOfTheKingBookData )
 
-let roiDf : Frame< string, string > =
-    profitDf
-    |> Frame.sliceCols [ "ROI in %" ]
+(* Character Mentions *)
 
-Chart.Column( roiDf )
-|> Chart.WithTitle "Return on Investment"  
-|> Chart.WithXTitle "Series"
-|> Chart.WithYTitle "ROI [ % ]"
-|> Chart.WithLegend true
- 
-profitDf
-|> Chart.Table
+let lotrImportantCharacters = 
+    [
+        "Frodo";
+        "Sam";
+        "Pippin";
+        "Merry";
+        "Aragorn";
+        "Legolas";
+        "Gimli";
+        "Gandalf";
+        "Boromir"
+        "Gollum";
+        "Saruman";
+        "Faramir";
+    ]
 
-// Feature 3: Academy Award - Wins / Nominations
-let academyAwardsDf : Frame< string, string > = 
-    movieSeriesDf
-    |> Frame.sliceCols [ "AcademyAwardNominations";  "AcademyAwardWins" ]
+let charactersToGetMentionsFor = [] // TODO: Fix the character list above.
+let characterMentions ( character : string ) ( book : BookData[] ) = 
+    let characterMentions = 
+        splitWords( book ) 
+        |> Array.filter( fun c -> c = character )
+        |> Array.length
+    { CharacterName = character; CharacterMentions = characterMentions }
 
-let academyAwardLosses : Series< string, float > = 
-    academyAwardsDf?AcademyAwardNominations - academyAwardsDf?AcademyAwardWins
+let characterMentionsAllBooks = 
+    charactersToGetMentionsFor
+    |> List.map ( fun c -> characterMentions c allLOTRBookData )
 
-academyAwardsDf.AddColumn( "AcademyAwardLoses", academyAwardLosses )
+let characterMentionsForFOR =
+    charactersToGetMentionsFor
+    |> List.map ( fun c -> characterMentions c fellowshipOfTheRingBookData )
 
-let lotrAcademyAwardsDf : Frame< string, string > =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Lord of the Rings Series" ]
+let characterMentionsForTT =
+    charactersToGetMentionsFor
+    |> List.map ( fun c -> characterMentions c twoTowersBookData )
 
-let lotrAcademyAwardWins : float = 
-    lotrAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.head
+let characterMentionsForROK =
+    charactersToGetMentionsFor
+    |> List.map ( fun c -> characterMentions c returnOfTheKingBookData )
 
-let lotrAcademyAwardLosses : float = 
-    lotrAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.head
+(* Sentiment Analysis *)
 
-let lotrAcademyAwardPieChart : GoogleChart = 
-    [ "Wins", lotrAcademyAwardWins; "Loses", lotrAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Lord of the Rings - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-lotrAcademyAwardPieChart
-
-let hobbitAcademyAwardsDf : Frame< string, string > =
-    academyAwardsDf
-    |> Frame.sliceRows [ "The Hobbit Series" ]
-
-let hobbitAcademyAwardWins : float = 
-    hobbitAcademyAwardsDf?AcademyAwardWins.Values
-    |> Seq.head
-
-let hobbitAcademyAwardLosses : float = 
-    hobbitAcademyAwardsDf?AcademyAwardLoses.Values
-    |> Seq.head
-
-let hobbitAcademyAwardPieChart : GoogleChart = 
-    [ "Wins", hobbitAcademyAwardWins; "Loses", hobbitAcademyAwardLosses ]
-    |> Chart.Pie
-    |> Chart.WithTitle "The Hobbit - Academy Awards Wins vs. Losses"
-    |> Chart.WithLegend true
-hobbitAcademyAwardPieChart
-
-let academyAwardWinPercentageSeries : Series< string, float > = 
-    ( academyAwardsDf?AcademyAwardWins 
-        / academyAwardsDf?AcademyAwardNominations ) * 100.0 
-
-academyAwardsDf.AddColumn( "AcademyAwardWinPercentage", academyAwardWinPercentageSeries )
-
-let academyAwardWinsDf : Frame< string, string > = 
-    let academyAwardWinsDf = 
-        academyAwardsDf 
-        |> Frame.sliceCols [ "AcademyAwardWinPercentage" ]
-
-    academyAwardWinsDf.RenameColumn( "AcademyAwardWinPercentage", "Wins %")
-    academyAwardWinsDf
-    
-
-Chart.Column( academyAwardWinsDf )
-|> Chart.WithTitle "Academy Awards Wins %"  
-|> Chart.WithXTitle "Series"
-|> Chart.WithYTitle "Wins [ % ]"
-|> Chart.WithLegend true
-
-// Result Df.
 
 (*** include-it:chart ***)
 

@@ -9,13 +9,11 @@ type Book =
     | TheFellowshipOfTheRing
     | TheTwoTowers
     | TheReturnOfTheKing
+    | TheHobbit
 
-type LotrData = { BookName    : Book; 
+type BookData = { BookName    : Book; 
                   ChapterName : string; 
                   ChapterData : string }
-
-type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
-type ChapterWordCount  = { BookName : Book; Chapter : string; Count : int;  }
 
 (*
 let charactersToGetMentionsFor = 
@@ -153,197 +151,61 @@ let charactersToGetMentionsFor =
        "Ted Sandyman"
        "Saruman"
        "Shagrat"
-       "Shelob"
        "Robin Smallburrow"
        "Snaga"
        "Targon"
-       "The King of the Dead"
-       "Thranduil"
        "Théoden"
        "Théodred"
-       "Adelar"
-       "Everard"
        "Pippin"
        "Treebeard"
-       "Daddy Twofoot"
-       "Ufthak"
-       "Uglúk"
-       "Watcher in the Water"
-       "Will Whitfoot"
-       "Widow Rumble"
-       "Willie Banks"
-       "Windfola"
        "Witch-king of Angmar"
        "Gríma"
-       "Wídfara"
-       "Éothain"
     ]
 *)
 
 [<Literal>]
-let file = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\LotrBook.txt"
+let lotrBookTxt = @"..\Data\LotrBook.txt"
+[<Literal>]
+let lotrJsonFile = @"..\Data\LordOfTheRingsBook.json"
 
-let data = File.ReadAllText( file )
-let split = data.Split('<')
-let filtered = 
-    split
-    |> Array.filter( fun r -> r <> "" )
+[<Literal>]
+let hobbitBookTxt = @"..\Data\Hobbit.txt"
+[<Literal>]
+let hobbitJsonFile = @"..\Data\Hobbit.json"
+
+(* Persist the Books Data Into JSON Form *)
+
+let lotrTextData : string = 
+    File.ReadAllText( lotrBookTxt )
+
+let hobbitTextData : string = 
+    File.ReadAllText( hobbitBookTxt )
+
+let splitAndFilteredBookData ( bookTextData : string ) : string[] = 
+     bookTextData.Split('<')
+     |> Array.filter( fun r -> r <> "" )
 
 let getBookName ( input : string ) : Book = 
     match input with
     | " The Return Of The King "     -> TheReturnOfTheKing
     | " The Two Towers "             -> TheTwoTowers
     | " The Fellowship Of The Ring " -> TheFellowshipOfTheRing
+    | " The Hobbit "                 -> TheHobbit
     | _ -> failwith "Book not found!"
 
-let allChapterData = 
-    filtered
+let allChapterData ( bookTextData : string ) : BookData[] = 
+    splitAndFilteredBookData bookTextData 
     |> Array.map( fun f -> 
         let split1 = f.Split('>')
         let split2 = split1.[ 0 ].Split('~')
         { BookName = getBookName( split2.[ 0 ] ); ChapterName = split2.[ 1 ]; ChapterData = split1.[ 1 ].Trim() })
 
-let jsonizeAllChapterData : string = 
-    JsonConvert.SerializeObject ( allChapterData, Formatting.Indented )
+let saveJsonData ( jsonFilePath : string ) ( chapterData : BookData[] ) : unit = 
+    let jsonizeAllChapterData ( allBookData : BookData[] ) : string = 
+        JsonConvert.SerializeObject ( allBookData, Formatting.Indented )
 
-let bookDataJsonFile = @"C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Data\LordOfTheRingsBook.json"
+    File.WriteAllText ( jsonFilePath, jsonizeAllChapterData( chapterData ))
 
-let saveJsonData = 
-    File.WriteAllText ( bookDataJsonFile, jsonizeAllChapterData )
-
-
-let fellowshipOfTheRing =
-    allChapterData
-    |> Array.filter( fun a -> a.BookName = TheFellowshipOfTheRing )
-
-let twoTowers =
-    allChapterData
-    |> Array.filter( fun a -> a.BookName = TheTwoTowers )
-
-let returnOfTheKing =
-    allChapterData
-    |> Array.filter( fun a -> a.BookName = TheReturnOfTheKing )
-
-(* Persist the Book Data *)
-
-let splitValues = [| ' '; '.'; '-'; ','; '!' |]
-
-let splitWords( data : LotrData[] ) : string [] =
-    let splitAndCleaned = 
-        data 
-        |> Array.collect( fun c -> 
-            c.ChapterData.Trim().Split( splitValues ))
-        |> Array.map( fun c -> c.Replace("`", "")
-                                .Replace("'", "")
-                                .Replace("-", "")
-                                .Replace(";", "")
-                                .Replace("?", "")
-                                .Replace("'", ""))
-        |> Array.filter( fun c -> c <> "'" && c <> "" && c <> "-" && c.Length <> 0 )
-    //File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", splitAndCleaned)
-
-    splitAndCleaned
-
-(* Word Counts *)
-
-let words ( lines : string ) : string[] = 
-    let cleanedLines = 
-        lines.Split( splitValues )
-        |> Array.filter( fun c -> 
-            c <> "'" && c <> "" && c <> "-" && c <> " " && c.Length <> 0 )
-    cleanedLines
-
-let wordCount ( lines : string ) : int =
-    //printfn "%A" cleanedLines
-    //File.AppendAllLines( __SOURCE_DIRECTORY__ + "/words.txt", cleanedLines )
-    Array.length ( words( lines )) 
-
-let totalWordCount = 
-    splitWords( allChapterData )
-    |> Array.length
-
-let forWordCount = 
-    splitWords( fellowshipOfTheRing )
-    |> Array.length
-
-let ttWordCount = 
-    splitWords( twoTowers )
-    |> Array.length
-
-let rokWordCount = 
-    splitWords( returnOfTheKing )
-    |> Array.length
-
-(* Unique Words *)
-
-let uniqueWords ( data : LotrData[] ) = 
-    splitWords( data )
-    |> Array.distinct
-
-let uniqueWordCount ( data : LotrData[] ) = 
-    uniqueWords( data )
-    |> Array.length
-
-let allUniqueWordCount = uniqueWordCount( allChapterData )
-let forUniqueWordCount = uniqueWordCount( fellowshipOfTheRing )
-let ttUniqueCount      = uniqueWordCount( twoTowers ) 
-let rokUniqueCount     = uniqueWordCount( returnOfTheKing )
-
-(* Word Counts Per Chapter *)
-
-let getChapterCounts ( book : LotrData[] ) : ChapterWordCount[] = 
-    book
-    |> Array.map( fun c -> 
-        { BookName = c.BookName; 
-          Chapter  = c.ChapterName; 
-          Count    = wordCount( c.ChapterData )})
-
-let allChapterCounts = getChapterCounts( allChapterData )
-let forChapterCounts = getChapterCounts( fellowshipOfTheRing )
-let ttChapterCounts  = getChapterCounts( twoTowers )
-let rokChapterCounts = getChapterCounts( returnOfTheKing )
-
-(* Unique Word Counts Per Chapter *)
-
-let getUniqueWordsPerChapter( book : LotrData[] ) : ChapterWordCount[] =
-    book
-    |> Array.map( fun c -> 
-        let allWords = words( c.ChapterData ) 
-        let uniqueWordCount =
-            allWords
-            |> Array.distinct
-            |> Array.length
-
-        { BookName = c.BookName; 
-          Chapter  = c.ChapterName; 
-          Count    = uniqueWordCount })
-
-let allUniqueWordsPerChapter = getUniqueWordsPerChapter( allChapterData )
-let forUniqueWordsPerChapter = getUniqueWordsPerChapter( fellowshipOfTheRing )
-let ttUniqueWordsPerChapter  = getUniqueWordsPerChapter( twoTowers )
-let rokUniqueWordsPerChapter = getUniqueWordsPerChapter( returnOfTheKing )
-
-(* Character Mentions *)
-let charactersToGetMentionsFor = [] // TODO: Fix the character list above.
-let characterMentions ( character : string ) ( book : LotrData[] )= 
-    let characterMentions = 
-        splitWords( book ) 
-        |> Array.filter( fun c -> c = character )
-        |> Array.length
-    { CharacterName = character; CharacterMentions = characterMentions }
-
-let characterMentionsAllBooks = 
-    charactersToGetMentionsFor
-    |> List.map ( fun c -> characterMentions c allChapterData )
-
-let characterMentionsForFOR =
-    charactersToGetMentionsFor
-    |> List.map ( fun c -> characterMentions c fellowshipOfTheRing )
-
-let characterMentionsForTT =
-    charactersToGetMentionsFor
-    |> List.map ( fun c -> characterMentions c twoTowers )
-
-let characterMentionsForROK =
-    charactersToGetMentionsFor
-    |> List.map ( fun c -> characterMentions c returnOfTheKing )
+let writeAllHobbitData : unit = 
+    let allHobbitChapterData = allChapterData( hobbitTextData )
+    saveJsonData hobbitJsonFile allHobbitChapterData |> ignore

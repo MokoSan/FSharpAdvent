@@ -108,6 +108,7 @@ let nameSeries : Series< int, string > =
     lotrCharacterDf
     |> Frame.getCol "Name"
 
+// Only consider the first name
 let firstName = 
     nameSeries
     |> Series.mapValues ( fun r -> r.Split ' ' |> Array.head )
@@ -166,7 +167,7 @@ let trainingDataSplit = 0.8
 let totalNumberOfDataPoints = inputs.Length 
 
 let combinedDataIdx =  
-    let random = Random.doublesSeed 100 totalNumberOfDataPoints 
+    let random = Random.doublesSeed 100 totalNumberOfDataPoints
     let training =
         random
         |> Array.mapi( fun i r -> i, r < trainingDataSplit )
@@ -225,7 +226,7 @@ let classificationResultWrapper ( name : string )
         | 3 -> "Dwarf"
         | _ -> failwith "Class not found"
 
-classificationResultWrapper "Ardamir" knnLearnt
+classificationResultWrapper "Arwe" knnLearnt
 
 // Confusion Matrix should be based on the Testing Data 
 let confusionMatrix = GeneralConfusionMatrix.Estimate( knnLearnt, testingDataInput, testingDataOutput )
