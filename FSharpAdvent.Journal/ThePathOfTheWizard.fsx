@@ -52,19 +52,17 @@ Loading the Character Data into the Journal
 
 [<Literal>]
 let lotrCharacterDataFilePath = __SOURCE_DIRECTORY__+  @"\..\Data\Characters.csv"
-type LotrCsvProvider          = CsvProvider< lotrCharacterDataFilePath >
-let lotrCsvProvider           = LotrCsvProvider.Load( lotrCharacterDataFilePath ) 
 
-let lotrCsvDf : Frame< int, string > 
+let lotrCharacterDf : Frame< int, string > 
     = Frame.ReadCsv( lotrCharacterDataFilePath )
 
-let lotrCsvDfCleaned : Frame< string, string > =  
-    lotrCsvDf
+let lotrCharacterDfCleaned : Frame< string, string > =  
+    lotrCharacterDf
     |> Frame.indexRowsString "Name"
     |> Frame.dropCol "Url"
 
 let options = Options( page = "enable", pageSize = 20 )
-lotrCsvDfCleaned
+lotrCharacterDfCleaned
 |> Chart.Table
 |> Chart.WithOptions options
 |> Chart.Show
@@ -72,7 +70,7 @@ lotrCsvDfCleaned
 let races = [ "Human"; "Hobbit"; "Elf"; "Dwarf"; "Maiar" ]
 
 let getSeriesByRaceName ( race : string ) : Series< string, string > = 
-    lotrCsvDfCleaned.GetColumn "Race"
+    lotrCharacterDfCleaned.GetColumn "Race"
     |> Series.filterValues( (=) race )
 
 let getSeriesByRaceCount ( race : string ) : int = 
@@ -98,6 +96,30 @@ raceCountDf
 |> Chart.Table
 
 // Fool of a Took
+
+let hobbitSeries : Series<string, string> = getSeriesByRaceName "Hobbit"
+
+
+// Race Prediction
+
+// Get First Name
+
+let nameSeries : Series< int, string > =  
+    lotrCharacterDf
+    |> Frame.getCol "Name"
+
+let firstName = 
+    nameSeries
+    |> Series.mapValues ( fun r -> r.Split ' ' |> Array.head )
+
+lotrCharacterDf.AddColumn ( "FirstName", firstName )
+lotrCharacterDf.DropColumn "Url"
+lotrCharacterDf.DropColumn "Name"
+
+let filterdCharacterDf : Frame < int, string > = 
+    lotrCharacterDf
+    |> Frame.filterRowValues ( fun r -> r.GetAs< string >( "Race" ) <> "Maiar" )
+
 
 
 
