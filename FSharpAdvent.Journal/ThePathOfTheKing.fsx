@@ -41,6 +41,10 @@ let allLOTRBookData   = JsonConvert.DeserializeObject< BookData[] >( allLOTRText
 let allHobbitText     = File.ReadAllText hobbitBookFilePath
 let allHobbitBookData = JsonConvert.DeserializeObject< BookData[] >( allHobbitText ) 
 
+type ChapterWordCount  = { BookName : Book; 
+                           Chapter : string; 
+                           WordCount: int;  }
+
 (* Book Based Data *)
 
 let fellowshipOfTheRingBookData : BookData[] =
@@ -57,80 +61,116 @@ let returnOfTheKingBookData : BookData[] =
 
 (* Word Counts *) 
 
-let splitValues = [| ' '; '.'; '-'; ','; '!'; '\''; '"'; |]
-let splitWords( data : BookData[] ) : string [] =
-
-    let cleanString ( input : string ) : string = 
-        input.Replace("`", "")
-             .Replace("'", "")
-             .Replace("-", "")
-             .Replace(";", "")
-             .Replace("?", "")
-             .Replace("\"", "")
+let cleanString ( input : string ) : string = 
+    input.Replace("`", "")
+         .Replace("'", "")
+         .Replace("-", "")
+         .Replace(";", "")
+         .Replace("?", "")
+         .Replace(":", "")
+         .Replace("\"", "")
         
-    data 
-    |> Array.collect( fun c -> c.ChapterData.Trim().Split( splitValues ))
+let splitValues = [| ' '; '.'; '-'; ','; '!'; '"'; |]
+let splitDataPerChapter ( chapter : string ) : string[] = 
+    chapter.Split( splitValues )
     |> Array.map( fun c -> cleanString( c )) 
     |> Array.filter( fun c -> c <> "'" && 
                               c <> "" && 
                               c <> "-" && 
                               c <> "\"" && 
                               c <> "-" && 
+                              c <> "`" && 
+                              c <> ";" && 
+                              c <> "?" && 
                               c.Length <> 0 )
 
-let totalLOTRWordCount : int = 
-    splitWords( allLOTRBookData )
+
+File.WriteAllLines( "C:\Users\MukundRaghavSharma\Desktop\F#\FSharpAdvent\Hi.txt", splitWords( fellowshipOfTheRingBookData ))
+
+let getWordCountForBook ( book : BookData[] ) : int = 
+    book
+    |> Array.collect( fun c -> splitDataPerChapter( c.ChapterData ))
     |> Array.length
 
-let forWordCount : int = 
-    splitWords( fellowshipOfTheRingBookData )
-    |> Array.length
+let totalLOTRWordCount : int = getWordCountForBook allLOTRBookData 
+let forWordCount       : int = getWordCountForBook fellowshipOfTheRingBookData
+let ttWordCount        : int = getWordCountForBook twoTowersBookData
+let rokWordCount       : int = getWordCountForBook returnOfTheKingBookData
+let hobbitWordCount    : int = getWordCountForBook allHobbitBookData
 
-let ttWordCount : int = 
-    splitWords( twoTowersBookData )
-    |> Array.length
+let LOTRWordCountData   : string * int = "The Lord of the Rings", totalLOTRWordCount 
+let FORWordCountData    : string * int = "The Fellowship of the Ring", forWordCount 
+let TTWordCountData     : string * int = "The Two Towers", ttWordCount 
+let ROKWordCountData    : string * int = "The Return of the King", rokWordCount 
+let HobbitWordCountData : string * int = "The Hobbit", hobbitWordCount
 
-let rokWordCount : int = 
-    splitWords( returnOfTheKingBookData )
-    |> Array.length
+let wordCounts : ( string * int ) list = 
+    [
+        LOTRWordCountData;
+        FORWordCountData;
+        TTWordCountData;
+        ROKWordCountData;
+        HobbitWordCountData;
+    ]
 
-let hobbitWordCount : int = 
-    splitWords( allHobbitBookData )
-    |> Array.length
+let bookWordCountDataFrame : Frame< string, string > =
+    wordCounts 
+    |> List.map( fun ( book, count ) -> book, "Word Count", count )
+    |> Frame.ofValues
+
+bookWordCountDataFrame
+|> Chart.Column
+|> Chart.WithLegend true
+|> Chart.WithTitle "The Lord of the Rings and Hobbit Books and Word Counts"
+|> Chart.WithYTitle "Word Counts"
+
+// Mean and Standard Deviation of 3 of the LOTR Books
+
+let lotrBooksWordCounts : Frame< string, string > =
+    bookWordCountDataFrame
+    |> Frame.sliceRows [ "The Fellowship of the Ring"; 
+                          "The Two Towers"; 
+                          "The Return of the King" ]
+
+let meanLOTRBookWordCounts : Series< string, float > =
+    lotrBooksWordCounts 
+    |> Stats.mean
+
+let stdDeviationLOTRBookWordCounts : Series< string, float > =
+    lotrBooksWordCounts 
+    |> Stats.stdDev
+
+let maxLOTRBookWordCounts : Series< string, float > = 
+    lotrBooksWordCounts 
+    |> Stats.max
+
+let minLOTRBookWordCounts : Series< string, float > = 
+    lotrBooksWordCounts 
+    |> Stats.min
 
 (* Chapter Data *)
 
-let wordsPerChapter ( wordsFromAChapter : string ) : string[] = 
-    let cleanedLines = 
-        wordsFromAChapter.Split( splitValues )
-        |> Array.filter( fun c -> 
-            c <> "'" && c <> "" && c <> "-" && c <> " " && c.Length <> 0 )
-    cleanedLines
-
-let wordCount ( chapter : string ) : int =
-    Array.length ( wordsPerChapter( chapter )) 
-
-type ChapterWordCount  = { BookName : Book; 
-                           Chapter : string; 
-                           WordCount: int;  }
+let wordCountPerChapter ( chapter : string ) : int =
+    splitDataPerChapter chapter
+    |> Array.length
 
 let getChapterWordCounts ( book : BookData[] ) : ChapterWordCount[] = 
     book
     |> Array.map( fun c -> 
         { BookName  = c.BookName; 
           Chapter   = c.ChapterName; 
-          WordCount = wordCount( c.ChapterData )})
+          WordCount = wordCountPerChapter( c.ChapterData )})
 
-let allLOTRChapterCounts = getChapterWordCounts( allLOTRBookData )
-let forChapterCounts     = getChapterWordCounts( fellowshipOfTheRingBookData )
-let ttChapterCounts      = getChapterWordCounts( twoTowersBookData )
-let rokChapterCounts     = getChapterWordCounts( returnOfTheKingBookData )
-
-let hobbitChapterCounts  = getChapterWordCounts ( allHobbitBookData )
+let allLOTRChapterCounts : ChapterWordCount[] = getChapterWordCounts( allLOTRBookData )
+let forChapterCounts     : ChapterWordCount[] = getChapterWordCounts( fellowshipOfTheRingBookData )
+let ttChapterCounts      : ChapterWordCount[] = getChapterWordCounts( twoTowersBookData )
+let rokChapterCounts     : ChapterWordCount[] = getChapterWordCounts( returnOfTheKingBookData )
+let hobbitChapterCounts  : ChapterWordCount[] = getChapterWordCounts ( allHobbitBookData )
 
 (* Character Mentions *)
 
-type CharacterMentions = { CharacterName : string; CharacterMentions : int; }
+type CharacterMentions = { CharacterName : string; 
+                           CharacterMentions : int; }
 
 let lotrImportantCharacters = 
     [
@@ -159,9 +199,16 @@ let characterMentionsAllLOTRBooks =
     lotrImportantCharacters
     |> List.map ( fun c -> characterMentions c allLOTRBookData )
 
+let mostPopularCharacterInBook ( characterMentionsOfBook : CharacterMentions list ) 
+                               : CharacterMentions =
+    characterMentionsOfBook 
+    |> List.maxBy ( fun c -> c.CharacterMentions )
+
 let characterMentionsForFOR =
     lotrImportantCharacters
     |> List.map ( fun c -> characterMentions c fellowshipOfTheRingBookData )
+
+let mostImportantCharacterInFOR : CharacterMentions
 
 let characterMentionsForTT =
     lotrImportantCharacters
@@ -197,6 +244,16 @@ let characterMentionsForHobbit =
 (* Chapter Based Character Interaction *)
 
 (* Sentiment Analysis *)
+
+open RDotNet
+open RProvider
+open RProvider.``base``
+open RProvider.utils
+
+R.install_packages("RSentiment")
+
+open RProvider.caret
+
 
 
 (*** include-it:chart ***)
